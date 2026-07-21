@@ -1,0 +1,12 @@
+{
+	"name": "blog",
+	"scripts": {
+		"check": "biome check --write .",
+		"check:unsafe": "biome check --write --unsafe .",
+		"prepare": "lefthook install"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.4",
+		"lefthook": "^2.1.10"
+	}
+}

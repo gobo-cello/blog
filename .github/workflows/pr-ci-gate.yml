@@ -1,0 +1,71 @@
+name: PR CI Gate
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  biome:
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: ./.github/actions/setup-node-npm
+      - run: npx biome ci --reporter=github .
+
+  build:
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: ./.github/actions/setup-node-npm
+        with:
+          working-directory: infra
+      - working-directory: infra
+        run: npm run build
+
+  jest:
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: ./.github/actions/setup-node-npm
+        with:
+          working-directory: infra
+      - working-directory: infra
+        run: npm test
+
+  cdk-synth:
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: ./.github/actions/setup-node-npm
+        with:
+          working-directory: infra
+      - working-directory: infra
+        run: npx cdk synth
+
+  pr-ci-gate:
+    needs:
+      - biome
+      - build
+      - jest
+      - cdk-synth
+    if: ${{ always() && !cancelled() }}
+    runs-on: ubuntu-slim
+    steps:
+      - name: Verify CI results
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          echo "$NEEDS" | jq -e '
+            all(
+              .[];
+              .result == "success" or .result == "skipped"
+            )
+          '
