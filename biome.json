@@ -16,6 +16,15 @@
 					}
 				}
 			}
+		},
+		{
+			"includes": ["**/*.html"],
+			"html": {
+				"formatter": {
+					"enabled": true,
+					"selfCloseVoidElements": "always"
+				}
+			}
 		}
 	]
 }
