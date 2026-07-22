@@ -108,10 +108,9 @@ Stack IDは`Sandbox*` / `Production*`のprefixで、deploy先accountを表す。
 ### Workflow構成
 
 - `pr-ci-gate.yml`: Pull Requestで`biome`・`build`・`jest`・`cdk synth`・`cdk diff`(sandbox environmentのcredentialを使用)を実行する。
-- `deploy-sandbox.yml`: `main`へのmerge後、GitHub Environment `sandbox`(承認ルールなし)でSandbox用stackを自動deployする。
-- `deploy-production.yml`: `deploy-sandbox.yml`の完了を`workflow_run`でtriggerとし、`conclusion == 'success'`の場合だけ実行する。GitHub Environment `production`(Required Reviewers)で承認付きdeployし、`deploy-sandbox.yml`と同じcommit(`github.event.workflow_run.head_sha`)をdeployする。
+- `deploy.yml`: `main`へのmerge後、`sandbox` job(GitHub Environment `sandbox`、承認ルールなし)がSandbox用stackを自動deployする。`production` job(GitHub Environment `production`、Required Reviewers)は`needs: sandbox`で`sandbox` jobの成功に依存し、承認後にProduction用stackをdeployする。
 
-`deploy-production.yml`を`push`ではなく`workflow_run`にしているのは、Sandboxへのdeployが成功したcommitだけをProductionへ昇格させるためである。両workflowを同じ`push`で独立にtriggerすると、Sandboxが失敗していてもProductionの承認さえ通ればdeployが進んでしまう。
+1つのworkflow内で`needs:`により`sandbox` job → `production` job の順序を保証している。これにより、Sandboxへのdeployが失敗した場合はProduction jobがそもそも実行されず、Required Reviewersの承認さえ通ればdeployできてしまう、という抜け道を防ぐ。両jobは同じworkflow実行内にあるため、checkoutされるcommitも自然に同一になる(将来e2eテストのjobを追加する場合も、`production`の`needs`をそのjobに差し替えるだけでよい)。
 
 設計判断の詳細な経緯は[ADR 0002](./adr/0002-github-actions-oidc-deploy.md)を参照。
 

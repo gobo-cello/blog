@@ -54,19 +54,23 @@ CodePipelineなどAWS側の承認機構ではなく、GitHub EnvironmentのRequi
 
 PRでは`cdk synth`(ダミーaccount IDによる型・構文チェック)と`cdk diff`(実sandbox accountに対する実際の差分確認)の両方を実行する。
 
-### ⑨ Workflowの分割数: 3つの責務に分ける
+### ⑨ Workflowの分割数: 2つの責務に分ける
 
-`pr-ci-gate.yml`(PR CI + diff)、`deploy-sandbox.yml`、`deploy-production.yml`の3workflowに分ける。責務が明確になり、権限も最小化しやすいため。既存の`pr-ci-gate.yml`がPR CIの役割を兼ねるため、新たに`ci.yml`は作成しない。
+`pr-ci-gate.yml`(PR CI + diff)と`deploy.yml`(deploy)の2workflowに分ける。既存の`pr-ci-gate.yml`がPR CIの役割を兼ねるため、新たに`ci.yml`は作成しない。
 
-### ⑩ SandboxとProductionの依存関係: `workflow_run`で直列化する
+### ⑩ SandboxとProductionの依存関係: 同一workflow内の`needs:`で直列化する
 
-`deploy-sandbox.yml`と`deploy-production.yml`を両方とも`push: main`で独立にtriggerすると、Sandboxへのdeployが失敗していても、Production側のRequired Reviewers承認さえ通ればdeployが進んでしまう。これはSandboxで動作確認したcommitだけをProductionへ昇格させる、という意図に反する。
+`deploy.yml`の`sandbox` jobと`production` jobを別workflowに分け`workflow_run`で繋ぐ案も検討したが、採用しなかった。理由は次のとおりである。
 
-そのため`deploy-production.yml`のtriggerは`push`ではなく`workflow_run`にし、`deploy-sandbox.yml`の`conclusion == 'success'`を条件にする。deploy対象のcommitも、`github.event.workflow_run.head_sha`を明示的にcheckoutすることで、Sandboxへdeployしたcommitと確実に一致させる。
+- `workflow_run`はdefault branch(`main`)上のworkflow定義を使ってtriggerされるため、依存関係の変更がmainへmergeされるまでの間、挙動が不安定になる
+- deploy対象のcommitを`github.event.workflow_run.head_sha`で明示的に揃える必要があり、実装が複雑になる
+- 2つのworkflow実行に分かれるため、Actionsタブでパイプライン全体の状態を一目で確認しづらい
+
+代わりに、1つの`deploy.yml`workflow内に`sandbox` jobと`production` jobを作り、`production: needs: sandbox`で依存させる。これにより、Sandboxへのdeployが失敗した場合はProduction jobがそもそも実行されず、Required Reviewersの承認さえ通ればdeployが進んでしまう、という抜け道を防ぐ。同一workflow実行のため、checkoutされるcommitも自然に同一になる。将来e2eテストのjobを追加する場合は、`e2e-test: needs: sandbox`、`production: needs: e2e-test`のようにneeds chainを差し替えるだけでよい。
 
 ## Consequences
 
 - `GithubDeployRoleStack`の初回deployは、GitHub Actions自身が自分のtrust関係をdeployすることができない(chicken-and-egg)ため、人がローカルのAdministratorAccess権限で`cdk bootstrap`・初回`cdk deploy`を実行する必要がある。
 - Deploy Role ARNやaccount IDはsecretではないが、production環境のRole ARNをGitHub Environment `production`のVariableとして登録することで、Required Reviewersの承認ゲートの内側に自然に組み込まれる。
 - 将来ホスティング用stackを追加する場合も、`Sandbox*` / `Production*`のstack命名規則と、対応するworkflowのstack selectorを踏襲する。
-- `workflow_run`はdefault branch(`main`)上のworkflow定義を使ってtriggerされるため、この依存関係は`deploy-production.yml`の変更が`main`へmergeされて初めて有効になる。mergeされるまでの間は、Sandboxが失敗していてもProductionが独立してtriggerされる可能性がある(既存の`push`ベースのworkflowが動き続けるため)。
+- `sandbox` jobと`production` jobが同一workflowにあるため、`production`のRequired Reviewers承認待ちの間も`sandbox` jobの実行結果と合わせて1つのworkflow実行として状態を追える。
