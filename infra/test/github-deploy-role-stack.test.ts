@@ -50,7 +50,7 @@ describe.each<BlogEnvironment>(["sandbox", "production"])(
 										"sts.amazonaws.com",
 								},
 								StringLike: {
-									"token.actions.githubusercontent.com:sub": `repo:gobo-cello/blog:environment:${deploymentEnvironment}`,
+									"token.actions.githubusercontent.com:sub": `repo:gobo-cello@*/blog@*:environment:${deploymentEnvironment}`,
 								},
 							},
 						}),
@@ -94,7 +94,7 @@ test("sandboxとproductionで異なるsub claimを生成する", () => {
 					Condition: Match.objectLike({
 						StringLike: {
 							"token.actions.githubusercontent.com:sub":
-								"repo:gobo-cello/blog:environment:sandbox",
+								"repo:gobo-cello@*/blog@*:environment:sandbox",
 						},
 					}),
 				}),
@@ -109,7 +109,7 @@ test("sandboxとproductionで異なるsub claimを生成する", () => {
 					Condition: Match.objectLike({
 						StringLike: {
 							"token.actions.githubusercontent.com:sub":
-								"repo:gobo-cello/blog:environment:production",
+								"repo:gobo-cello@*/blog@*:environment:production",
 						},
 					}),
 				}),
