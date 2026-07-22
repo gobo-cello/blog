@@ -54,7 +54,7 @@ jobs:
           role-to-assume: ${{ vars.AWS_BLOG_PRODUCTION_DEPLOY_ROLE_ARN }}
           aws-region: ap-northeast-1
       - working-directory: infra
-        run: npx cdk deploy ProductionGithubDeployRoleStack --require-approval never
+        run: npx cdk deploy ProductionGithubDeployRoleStack ProductionDnsStack --require-approval never
         env:
           AWS_BLOG_SANDBOX_ACCOUNT_ID: ${{ vars.AWS_BLOG_SANDBOX_ACCOUNT_ID }}
           AWS_BLOG_PRODUCTION_ACCOUNT_ID: ${{ vars.AWS_BLOG_PRODUCTION_ACCOUNT_ID }}
