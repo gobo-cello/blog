@@ -93,25 +93,37 @@ blog/
 │   ├── bin/
 │   │   └── infra.ts
 │   ├── lib/
-│   │   └── infra-stack.ts
+│   │   ├── config/
+│   │   │   ├── accounts.ts
+│   │   │   ├── cdk-bootstrap.ts
+│   │   │   ├── environments.ts
+│   │   │   ├── github.ts
+│   │   │   └── tags.ts
+│   │   └── stacks/
+│   │       └── github-deploy-role-stack.ts
 │   ├── test/
-│   │   └── infra.test.ts
+│   │   ├── accounts.test.ts
+│   │   └── github-deploy-role-stack.test.ts
 │   ├── cdk.json
 │   ├── jest.config.js
 │   ├── package.json
 │   ├── package-lock.json
 │   ├── tsconfig.json
+│   ├── .env.example
 │   └── README.md
 ├── docs/
 │   ├── architecture.md
 │   └── adr/
-│       └── 0001-repository-boundary.md
+│       ├── 0001-repository-boundary.md
+│       └── 0002-github-actions-oidc-deploy.md
 ├── .github/
 │   ├── actions/
 │   │   └── setup-node-npm/
 │   ├── workflows/
 │   │   ├── main-ci.yml
-│   │   └── pr-ci-gate.yml
+│   │   ├── pr-ci-gate.yml
+│   │   ├── deploy-sandbox.yml
+│   │   └── deploy-production.yml
 │   ├── copilot-instructions.md
 │   └── dependabot.yml
 ├── .claude/
@@ -125,11 +137,11 @@ blog/
 └── SECURITY.md
 ```
 
-実装対象が増えた場合に限り、`infra/`配下を次の責務へ分割します。
+`infra/`配下は次の責務で分割しています。
 
 - `infra/bin/`: CDK applicationのentry point
 - `infra/lib/stacks/`: AWS accountまたはdeployment boundaryごとのStack
-- `infra/lib/constructs/`: 複数のAWS resourceからなる論理的な機能単位
+- `infra/lib/constructs/`: 複数のAWS resourceからなる論理的な機能単位(実装対象が増えた場合に追加)
 - `infra/lib/config/`: secretを含まない環境設定
 - `infra/test/`: CDK templateおよびConstructのテスト
 
@@ -223,6 +235,40 @@ sso_registration_scopes = sso:account:access
 ```
 
 `aws sso login --profile <profile名>`でログインしてから、各`--profile`オプションでコマンドを実行します。
+
+## GitHub ActionsとAWSの接続
+
+GitHub ActionsからAWSへは、OIDCによる一時認証だけを使用します。長期的なAWS access keyは発行しません。設計の詳細は[docs/architecture.md](./docs/architecture.md)と[ADR 0002](./docs/adr/0002-github-actions-oidc-deploy.md)を参照してください。
+
+`infra/`には、GitHub ActionsがOIDCでdeployするための`SandboxGithubDeployRoleStack` / `ProductionGithubDeployRoleStack`が定義されています。GitHub Actions自身は自分のtrust関係を初回だけ自動デプロイできないため(chicken-and-egg)、次の手順を人手で1回だけ行う必要があります。
+
+1. ローカルのAdministratorAccess profileで、両accountにCDK bootstrapを実行します。
+
+   ```sh
+   cd infra
+   npx cdk bootstrap aws://<Sandbox account ID>/ap-northeast-1 --profile blog-sandbox
+   npx cdk bootstrap aws://<Production account ID>/ap-northeast-1 --profile blog-production
+   ```
+
+2. `infra/.env.local`(gitignore対象、`.env.example`を元に作成)にaccount IDを設定し、ローカルから初回だけ手動でdeployします。`.env.local`は`cdk.json`の`app`コマンドが`--env-file-if-exists`で自動読み込みするため、`cdk synth`・`cdk deploy`実行前に手動でsourceする必要はありません。
+
+   ```sh
+   cd infra
+   npx cdk deploy SandboxGithubDeployRoleStack --profile blog-sandbox
+   npx cdk deploy ProductionGithubDeployRoleStack --profile blog-production
+   ```
+
+3. deploy出力の`GithubDeployRoleArn`を控えます。
+
+4. GitHubリポジトリに Environment `sandbox` / `production` を作成し、`production`にRequired Reviewersを設定します。
+
+5. 次のGitHub Variablesを登録します。
+
+   - Repository Variables: `AWS_BLOG_SANDBOX_ACCOUNT_ID`、`AWS_BLOG_PRODUCTION_ACCOUNT_ID`
+   - Environment `sandbox` Variables: `AWS_BLOG_SANDBOX_DEPLOY_ROLE_ARN`(手順3のSandbox側ARN)
+   - Environment `production` Variables: `AWS_BLOG_PRODUCTION_DEPLOY_ROLE_ARN`(手順3のProduction側ARN)
+
+以降は、Pull Requestでの`cdk diff`、`main`へのmergeによる`deploy-sandbox.yml`の自動実行、`deploy-production.yml`の承認付き実行で運用します。
 
 ## Git運用
 

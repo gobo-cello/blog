@@ -1,5 +1,5 @@
 {
-	"app": "npx tsc && npx tsx bin/infra.ts",
+	"app": "npx tsc && npx tsx --env-file-if-exists=.env.local bin/infra.ts",
 	"watch": {
 		"include": ["**"],
 		"exclude": [
