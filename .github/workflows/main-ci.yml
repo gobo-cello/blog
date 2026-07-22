@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-slim
     strategy:
       matrix:
-        working-directory: [".", "infra"]
+        working-directory: [".", "infra", "app"]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - uses: ./.github/actions/setup-node-npm

@@ -18,6 +18,15 @@ pre-push:
     cdk-synth:
       root: "infra/"
       run: npx cdk synth
+    app-build:
+      root: "app/"
+      run: npm run build
+    app-test:
+      root: "app/"
+      run: npm test
+    app-check-images:
+      root: "app/"
+      run: npm run check:images
 
 commit-msg:
   commands:

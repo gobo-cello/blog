@@ -40,6 +40,46 @@ jobs:
       - working-directory: infra
         run: npm test
 
+  app-build:
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: ./.github/actions/setup-node-npm
+        with:
+          working-directory: app
+      - working-directory: app
+        run: npm run build
+
+  app-check-types:
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: ./.github/actions/setup-node-npm
+        with:
+          working-directory: app
+      - working-directory: app
+        run: npm run check:types
+
+  app-test:
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: ./.github/actions/setup-node-npm
+        with:
+          working-directory: app
+      - working-directory: app
+        run: npm test
+
+  app-check-images:
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: ./.github/actions/setup-node-npm
+        with:
+          working-directory: app
+      - working-directory: app
+        run: npm run check:images
+
   cdk-synth:
     runs-on: ubuntu-slim
     steps:
@@ -79,6 +119,10 @@ jobs:
       - biome
       - build
       - jest
+      - app-build
+      - app-check-types
+      - app-test
+      - app-check-images
       - cdk-synth
       - cdk-diff
     if: ${{ always() && !cancelled() }}

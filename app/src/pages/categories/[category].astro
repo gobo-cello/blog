@@ -1,0 +1,32 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+	const posts = await getCollection("blog", ({ data }) => !data.draft);
+	const categories = [...new Set(posts.map((post) => post.data.category))];
+	return categories.map((category) => ({
+		params: { category },
+		props: { posts: posts.filter((post) => post.data.category === category) },
+	}));
+}
+
+const { category } = Astro.params;
+const { posts } = Astro.props;
+---
+
+<BaseLayout
+	title={`カテゴリ: ${category}`}
+	description={`${category}カテゴリの記事一覧です。`}
+>
+	<h1>{category}</h1>
+	<ul>
+		{
+			posts.map((post) => (
+				<li>
+					<a href={`/posts/${post.id}/`}>{post.data.title}</a>
+				</li>
+			))
+		}
+	</ul>
+</BaseLayout>
