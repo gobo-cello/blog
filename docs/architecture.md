@@ -114,8 +114,28 @@ Stack IDは`Sandbox*` / `Production*`のprefixで、deploy先accountを表す。
 
 設計判断の詳細な経緯は[ADR 0002](./adr/0002-github-actions-oidc-deploy.md)を参照。
 
+## DNSと証明書
+
+`blog.gobo-cello.com`のhosted zoneと、CloudFront用のACM証明書を`ProductionDnsStack`(`infra/lib/stacks/dns-stack.ts`)で管理する。
+
+```text
+gobo-cello.com (apex hosted zone、aws-platformが管理)
+  └─ NS delegation → blog.gobo-cello.com (blog-productionが所有するhosted zone)
+                        └─ ACM証明書(DNS検証、同じhosted zone内で完結)
+```
+
+apex hosted zoneは`aws-platform`リポジトリが管理し、`blog.gobo-cello.com`はNS delegationで委譲を受ける。証明書のDNS検証は、このリポジトリが所有する`blog.gobo-cello.com`のhosted zone内だけで完結するため、aws-platform側との追加のやり取りは不要である(初回のname server受け渡しを除く)。
+
+### なぜus-east-1で証明書を作るか
+
+CloudFrontにアタッチするACM証明書は、AWSの仕様上`us-east-1`でしか発行できない。`blog-production`accountの他のstackは`ap-northeast-1`を使うが、`ProductionDnsStack`だけは明示的に`env.region: "us-east-1"`を指定する。Route 53 Hosted ZoneはRegionを持たないglobal serviceなので、同じstackへ含めても問題ない。将来CloudFrontを追加する際の手戻り(証明書の作り直し)を避けるため、最初からこのregionで作成する。
+
+### DNSSECは見送る
+
+apex側の判断(ADR参照)と同じ理由により、このリポジトリ側でも設定しない。
+
 ## 今後の実装方針
 
-具体的なブログ配信用のリソース(S3、CloudFront、Route 53など)は、実際にブログアプリケーションを配置する際に段階的に設計・追加する。
+具体的なブログ配信用のリソース(S3、CloudFrontなど)は、実際にブログアプリケーションを配置する際に段階的に設計・追加する。`ProductionDnsStack`が持つhosted zone・証明書は、その際にCloudFrontディストリビューションから参照される想定である。
 
 使用されていないStack、Construct、設定ファイルは先行して作成しない。
