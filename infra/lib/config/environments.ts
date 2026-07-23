@@ -1,4 +1,5 @@
 import { type AwsAccountId, parseAwsAccountId } from "./accounts";
+import { parseNameServers } from "./dns";
 
 export const supportedAwsRegions = ["ap-northeast-1"] as const;
 
@@ -16,6 +17,7 @@ export type BlogEnvironment = (typeof blogEnvironments)[number];
 export interface BlogConfiguration {
 	readonly sandbox: AwsEnvironment;
 	readonly production: AwsEnvironment;
+	readonly sandboxSubdomainNameServers?: readonly string[] | undefined;
 }
 
 export class MissingEnvironmentVariableError extends Error {
@@ -35,8 +37,22 @@ function readRequiredEnvironmentVariable(name: string): string {
 	return value;
 }
 
+function readOptionalEnvironmentVariable(name: string): string | undefined {
+	const value: string | undefined = process.env[name];
+
+	return value === undefined || value.length === 0 ? undefined : value;
+}
+
 export function loadBlogConfiguration(): BlogConfiguration {
 	const region: AwsRegion = "ap-northeast-1";
+
+	const sandboxSubdomainNameServersValue = readOptionalEnvironmentVariable(
+		"SANDBOX_SUBDOMAIN_NAME_SERVERS",
+	);
+	const sandboxSubdomainNameServers =
+		sandboxSubdomainNameServersValue === undefined
+			? undefined
+			: parseNameServers(sandboxSubdomainNameServersValue);
 
 	return {
 		sandbox: {
@@ -51,5 +67,6 @@ export function loadBlogConfiguration(): BlogConfiguration {
 			),
 			region,
 		},
+		sandboxSubdomainNameServers,
 	} satisfies BlogConfiguration;
 }
