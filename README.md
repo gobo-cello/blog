@@ -100,13 +100,20 @@ blog/
 │   │   │   ├── environments.ts
 │   │   │   ├── github.ts
 │   │   │   └── tags.ts
+│   │   ├── constructs/
+│   │   │   └── static-site-hosting.ts
 │   │   └── stacks/
 │   │       ├── dns-stack.ts
 │   │       ├── github-deploy-role-stack.ts
+│   │       ├── hosting-stack.ts
 │   │       └── sandbox-dns-stack.ts
 │   ├── test/
+│   │   ├── fixtures/
+│   │   │   └── static-site/
 │   │   ├── accounts.test.ts
-│   │   └── github-deploy-role-stack.test.ts
+│   │   ├── github-deploy-role-stack.test.ts
+│   │   ├── hosting-stack.test.ts
+│   │   └── static-site-hosting.test.ts
 │   ├── cdk.json
 │   ├── jest.config.js
 │   ├── package.json
@@ -144,7 +151,8 @@ blog/
 │       ├── 0001-repository-boundary.md
 │       ├── 0002-github-actions-oidc-deploy.md
 │       ├── 0003-dns-and-certificate.md
-│       └── 0004-blog-implementation-approach.md
+│       ├── 0004-blog-implementation-approach.md
+│       └── 0006-static-site-hosting.md
 ├── .github/
 │   ├── actions/
 │   │   └── setup-node-npm/
