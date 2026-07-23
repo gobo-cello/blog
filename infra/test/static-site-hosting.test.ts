@@ -74,6 +74,15 @@ describe("StaticSiteHosting", () => {
 		});
 	});
 
+	test("アクセスログ用bucketはCloudFront標準ログのACL書き込みを許可する", () => {
+		template.hasResourceProperties("AWS::S3::Bucket", {
+			AccessControl: "LogDeliveryWrite",
+			OwnershipControls: {
+				Rules: [{ ObjectOwnership: "ObjectWriter" }],
+			},
+		});
+	});
+
 	test("hosted zoneへCloudFront宛のaliasレコードを作成する", () => {
 		template.hasResourceProperties("AWS::Route53::RecordSet", {
 			Name: "example.com.",
