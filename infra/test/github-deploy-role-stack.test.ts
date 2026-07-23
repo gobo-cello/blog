@@ -83,6 +83,41 @@ describe.each<BlogEnvironment>(["sandbox", "production"])(
 	},
 );
 
+test("additionalRegionsを指定した場合はそのregionのCDK bootstrapロールへのAssumeRoleも許可する", () => {
+	const app = new App();
+	const awsEnvironment = {
+		account: parseAwsAccountId("111111111111"),
+		region: "ap-northeast-1" as const,
+	};
+
+	const stack = new GithubDeployRoleStack(app, "TestProductionStack", {
+		env: awsEnvironment,
+		awsEnvironment,
+		deploymentEnvironment: "production",
+		additionalRegions: ["us-east-1"],
+	});
+	const template = Template.fromStack(stack);
+
+	template.hasResourceProperties("AWS::IAM::Policy", {
+		PolicyDocument: Match.objectLike({
+			Statement: Match.arrayWith([
+				Match.objectLike({
+					Action: "sts:AssumeRole",
+					Effect: "Allow",
+					Resource: [
+						"arn:aws:iam::111111111111:role/cdk-hnb659fds-deploy-role-111111111111-ap-northeast-1",
+						"arn:aws:iam::111111111111:role/cdk-hnb659fds-file-publishing-role-111111111111-ap-northeast-1",
+						"arn:aws:iam::111111111111:role/cdk-hnb659fds-lookup-role-111111111111-ap-northeast-1",
+						"arn:aws:iam::111111111111:role/cdk-hnb659fds-deploy-role-111111111111-us-east-1",
+						"arn:aws:iam::111111111111:role/cdk-hnb659fds-file-publishing-role-111111111111-us-east-1",
+						"arn:aws:iam::111111111111:role/cdk-hnb659fds-lookup-role-111111111111-us-east-1",
+					],
+				}),
+			]),
+		}),
+	});
+});
+
 test("sandboxとproductionで異なるsub claimを生成する", () => {
 	const { template: sandboxTemplate } = synthesize("sandbox");
 	const { template: productionTemplate } = synthesize("production");

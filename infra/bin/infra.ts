@@ -12,12 +12,16 @@ new GithubDeployRoleStack(app, "SandboxGithubDeployRoleStack", {
 	env: configuration.sandbox,
 	awsEnvironment: configuration.sandbox,
 	deploymentEnvironment: "sandbox",
+	// SandboxDnsStackなど、CloudFront用ACM証明書はus-east-1固定のstackもdeployするため。
+	additionalRegions: ["us-east-1"],
 });
 
 new GithubDeployRoleStack(app, "ProductionGithubDeployRoleStack", {
 	env: configuration.production,
 	awsEnvironment: configuration.production,
 	deploymentEnvironment: "production",
+	// ProductionDnsStackなど、CloudFront用ACM証明書はus-east-1固定のstackもdeployするため。
+	additionalRegions: ["us-east-1"],
 });
 
 new DnsStack(app, "ProductionDnsStack", {

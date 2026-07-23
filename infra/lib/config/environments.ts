@@ -1,7 +1,7 @@
 import { type AwsAccountId, parseAwsAccountId } from "./accounts";
 import { parseNameServers } from "./dns";
 
-export const supportedAwsRegions = ["ap-northeast-1"] as const;
+export const supportedAwsRegions = ["ap-northeast-1", "us-east-1"] as const;
 
 export type AwsRegion = (typeof supportedAwsRegions)[number];
 
