@@ -107,8 +107,8 @@ Stack IDは`Sandbox*` / `Production*`のprefixで、deploy先accountを表す。
 
 ### Workflow構成
 
-- `pr-ci-gate.yml`: Pull Requestで`biome`・`build`・`jest`・`cdk synth`・`cdk diff`(sandbox environmentのcredentialを使用)を実行する。
-- `deploy.yml`: `main`へのmerge後、`sandbox` job(GitHub Environment `sandbox`、承認ルールなし)がSandbox用stackを自動deployする。`production` job(GitHub Environment `production`、Required Reviewers)は`needs: sandbox`で`sandbox` jobの成功に依存し、承認後にProduction用stackをdeployする。
+- `pr-ci-gate.yml`: Pull Requestで`biome`・`build`・`jest`・`cdk synth`・`cdk diff`(sandbox environmentのcredentialを使用)を実行する。`HostingStack`の`BucketDeployment`が`app/dist`の実在をsynth時に要求するため、`cdk synth`・`cdk diff`の実行前に`app/`をビルドする。
+- `deploy.yml`: `main`へのmerge後、`sandbox` job(GitHub Environment `sandbox`、承認ルールなし)がSandbox用stackを自動deployする。`production` job(GitHub Environment `production`、Required Reviewers)は`needs: sandbox`で`sandbox` jobの成功に依存し、承認後にProduction用stackをdeployする。`sandbox`/`production`両jobとも、`cdk`コマンド実行前に`app/`をビルドする(理由は上記と同じ)。triggerの`paths`にも`app/**`を含め、ブログ記事など`app/`だけの変更でも自動デプロイされるようにしている。
 
 1つのworkflow内で`needs:`により`sandbox` job → `production` job の順序を保証している。これにより、Sandboxへのdeployが失敗した場合はProduction jobがそもそも実行されず、Required Reviewersの承認さえ通ればdeployできてしまう、という抜け道を防ぐ。両jobは同じworkflow実行内にあるため、checkoutされるcommitも自然に同一になる(将来e2eテストのjobを追加する場合も、`production`の`needs`をそのjobに差し替えるだけでよい)。
 
