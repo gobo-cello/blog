@@ -12,8 +12,10 @@ import { CloudFrontTarget } from "aws-cdk-lib/aws-route53-targets";
 import {
 	BlockPublicAccess,
 	Bucket,
+	BucketAccessControl,
 	BucketEncryption,
 	type IBucket,
+	ObjectOwnership,
 } from "aws-cdk-lib/aws-s3";
 import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
 import { Construct } from "constructs";
@@ -62,6 +64,10 @@ export class StaticSiteHosting extends Construct {
 			removalPolicy: props.removalPolicy,
 			autoDeleteObjects: props.autoDeleteObjects,
 			lifecycleRules: [{ expiration: Duration.days(90) }],
+			// CloudFront標準アクセスログはACL経由でログ配信アカウントが書き込むため、
+			// S3のデフォルト(ACL無効化)のままではDistribution作成がInvalidRequestで失敗する。
+			objectOwnership: ObjectOwnership.OBJECT_WRITER,
+			accessControl: BucketAccessControl.LOG_DELIVERY_WRITE,
 		});
 
 		this.distribution = new Distribution(this, "Distribution", {
