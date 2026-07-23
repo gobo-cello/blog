@@ -12,7 +12,11 @@ import {
 	createCdkFilePublishingRoleArn,
 	createCdkLookupRoleArn,
 } from "../config/cdk-bootstrap";
-import type { AwsEnvironment, BlogEnvironment } from "../config/environments";
+import type {
+	AwsEnvironment,
+	AwsRegion,
+	BlogEnvironment,
+} from "../config/environments";
 import {
 	createGithubActionsSubClaim,
 	githubActionsOidcAudience,
@@ -23,6 +27,11 @@ import { applyPlatformTags, createPlatformTags } from "../config/tags";
 export interface GithubDeployRoleStackProps extends StackProps {
 	readonly deploymentEnvironment: BlogEnvironment;
 	readonly awsEnvironment: AwsEnvironment;
+	/**
+	 * awsEnvironment.regionに加えてAssumeRoleを許可するregion。
+	 * CloudFront用ACM証明書などus-east-1固定のstackをdeployする場合に指定する。
+	 */
+	readonly additionalRegions?: readonly AwsRegion[];
 }
 
 export class GithubDeployRoleStack extends Stack {
@@ -56,24 +65,20 @@ export class GithubDeployRoleStack extends Stack {
 				"Only allows assuming the CDK bootstrap deploy-role, file-publishing-role, and lookup-role.",
 		});
 
+		const regions = [
+			props.awsEnvironment.region,
+			...(props.additionalRegions ?? []),
+		];
+
 		deployRole.addToPolicy(
 			new PolicyStatement({
 				effect: Effect.ALLOW,
 				actions: ["sts:AssumeRole"],
-				resources: [
-					createCdkDeployRoleArn(
-						props.awsEnvironment.account,
-						props.awsEnvironment.region,
-					),
-					createCdkFilePublishingRoleArn(
-						props.awsEnvironment.account,
-						props.awsEnvironment.region,
-					),
-					createCdkLookupRoleArn(
-						props.awsEnvironment.account,
-						props.awsEnvironment.region,
-					),
-				],
+				resources: regions.flatMap((region) => [
+					createCdkDeployRoleArn(props.awsEnvironment.account, region),
+					createCdkFilePublishingRoleArn(props.awsEnvironment.account, region),
+					createCdkLookupRoleArn(props.awsEnvironment.account, region),
+				]),
 			}),
 		);
 
