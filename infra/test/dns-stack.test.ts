@@ -35,4 +35,28 @@ describe("DnsStack", () => {
 	test("Stack termination protectionを有効にする", () => {
 		expect(stack.terminationProtection).toBe(true);
 	});
+
+	test("sandboxSubdomainNameServersが未指定の場合はNS delegationレコードを作成しない", () => {
+		template.resourceCountIs("AWS::Route53::RecordSet", 0);
+	});
+});
+
+describe("DnsStack (sandboxSubdomainNameServers指定時)", () => {
+	const app = new App();
+	const stack = new DnsStack(app, "TestDnsStack", {
+		env: { account: parseAwsAccountId("111111111111"), region: "us-east-1" },
+		sandboxSubdomainNameServers: ["ns-1.awsdns-00.com", "ns-2.awsdns-00.org"],
+	});
+	const template = Template.fromStack(stack);
+
+	test("sandbox宛のNS delegationレコードを作成する", () => {
+		template.hasResourceProperties("AWS::Route53::RecordSet", {
+			Name: "sandbox.blog.gobo-cello.com.",
+			Type: "NS",
+			ResourceRecords: Match.arrayEquals([
+				"ns-1.awsdns-00.com",
+				"ns-2.awsdns-00.org",
+			]),
+		});
+	});
 });

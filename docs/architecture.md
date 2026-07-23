@@ -116,15 +116,17 @@ Stack IDは`Sandbox*` / `Production*`のprefixで、deploy先accountを表す。
 
 ## DNSと証明書
 
-`blog.gobo-cello.com`のhosted zoneと、CloudFront用のACM証明書を`ProductionDnsStack`(`infra/lib/stacks/dns-stack.ts`)で管理する。
+`blog.gobo-cello.com`のhosted zoneと、CloudFront用のACM証明書を`ProductionDnsStack`(`infra/lib/stacks/dns-stack.ts`)で管理する。`sandbox.blog.gobo-cello.com`は同様に`SandboxDnsStack`(`infra/lib/stacks/sandbox-dns-stack.ts`)で管理する。
 
 ```text
 gobo-cello.com (apex hosted zone、aws-platformが管理)
   └─ NS delegation → blog.gobo-cello.com (blog-productionが所有するhosted zone)
-                        └─ ACM証明書(DNS検証、同じhosted zone内で完結)
+                        ├─ ACM証明書(DNS検証、同じhosted zone内で完結)
+                        └─ NS delegation → sandbox.blog.gobo-cello.com (blog-sandboxが所有するhosted zone)
+                                              └─ ACM証明書(DNS検証、同じhosted zone内で完結)
 ```
 
-apex hosted zoneは`aws-platform`リポジトリが管理し、`blog.gobo-cello.com`はNS delegationで委譲を受ける。証明書のDNS検証は、このリポジトリが所有する`blog.gobo-cello.com`のhosted zone内だけで完結するため、aws-platform側との追加のやり取りは不要である(初回のname server受け渡しを除く)。
+apex hosted zoneは`aws-platform`リポジトリが管理し、`blog.gobo-cello.com`はNS delegationで委譲を受ける。`blog.gobo-cello.com`から`sandbox.blog.gobo-cello.com`への委譲も同じパターンを一段再帰させたものであり、`DnsStack`(production)の`sandboxSubdomainNameServers` propが有効な場合のみNSレコードを作成する。各hosted zoneの証明書のDNS検証は、それぞれが所有するhosted zone内だけで完結するため、account間・リポジトリ間での追加のやり取りは不要である(初回のname server受け渡しを除く)。設計判断の詳細は[ADR 0003](./adr/0003-dns-and-certificate.md)・[ADR 0005](./adr/0005-sandbox-dns-and-certificate.md)を参照。
 
 ### なぜus-east-1で証明書を作るか
 
