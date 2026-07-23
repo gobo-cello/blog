@@ -31,8 +31,15 @@ jobs:
         with:
           role-to-assume: ${{ vars.AWS_BLOG_SANDBOX_DEPLOY_ROLE_ARN }}
           aws-region: ap-northeast-1
-      - working-directory: infra
+      - name: Deploy SandboxGithubDeployRoleStack
+        working-directory: infra
         run: npx cdk deploy SandboxGithubDeployRoleStack --require-approval never
+        env:
+          AWS_BLOG_SANDBOX_ACCOUNT_ID: ${{ vars.AWS_BLOG_SANDBOX_ACCOUNT_ID }}
+          AWS_BLOG_PRODUCTION_ACCOUNT_ID: ${{ vars.AWS_BLOG_PRODUCTION_ACCOUNT_ID }}
+      - name: Deploy SandboxDnsStack
+        working-directory: infra
+        run: npx cdk deploy SandboxDnsStack --require-approval never
         env:
           AWS_BLOG_SANDBOX_ACCOUNT_ID: ${{ vars.AWS_BLOG_SANDBOX_ACCOUNT_ID }}
           AWS_BLOG_PRODUCTION_ACCOUNT_ID: ${{ vars.AWS_BLOG_PRODUCTION_ACCOUNT_ID }}
