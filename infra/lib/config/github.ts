@@ -1,8 +1,8 @@
 import type { BlogEnvironment } from "./environments";
 
-export const githubRepositoryOwner = "gobo-cello" as const;
+const githubRepositoryOwner = "gobo-cello" as const;
 
-export const githubRepositoryName = "blog" as const;
+const githubRepositoryName = "blog" as const;
 
 export const githubActionsOidcProviderUrl =
 	"https://token.actions.githubusercontent.com" as const;

@@ -80,6 +80,26 @@ jobs:
       - working-directory: app
         run: npm run check:images
 
+  knip:
+    strategy:
+      fail-fast: false
+      matrix:
+        workspace: [".", "app", "infra"]
+        mode: ["default", "production"]
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: ./.github/actions/setup-node-npm
+      - if: ${{ matrix.workspace != '.' }}
+        uses: ./.github/actions/setup-node-npm
+        with:
+          working-directory: ${{ matrix.workspace }}
+      - name: knip (${{ matrix.workspace }}, ${{ matrix.mode }})
+        run: >-
+          npx knip --workspace ${{ matrix.workspace }}
+          ${{ matrix.mode == 'production' && '--production --strict' || '' }}
+          --reporter github-actions
+
   cdk-synth:
     runs-on: ubuntu-slim
     steps:
@@ -135,6 +155,7 @@ jobs:
       - app-check-types
       - app-test
       - app-check-images
+      - knip
       - cdk-synth
       - cdk-diff
     if: ${{ always() && !cancelled() }}
