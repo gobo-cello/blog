@@ -4,6 +4,7 @@ export type AwsAccountId = string & {
 	readonly [awsAccountIdBrand]: "AwsAccountId";
 };
 
+/** @internal テストの toThrow アサーションのためだけに export しており、production コードからは参照されない */
 export class InvalidAwsAccountIdError extends Error {
 	public constructor(value: unknown) {
 		super(`Invalid AWS account ID: ${String(value)}`);

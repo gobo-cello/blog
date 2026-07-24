@@ -1,7 +1,7 @@
 import { type AwsAccountId, parseAwsAccountId } from "./accounts";
 import { parseNameServers } from "./dns";
 
-export const supportedAwsRegions = ["ap-northeast-1", "us-east-1"] as const;
+const supportedAwsRegions = ["ap-northeast-1", "us-east-1"] as const;
 
 export type AwsRegion = (typeof supportedAwsRegions)[number];
 
@@ -10,7 +10,7 @@ export interface AwsEnvironment {
 	readonly region: AwsRegion;
 }
 
-export const blogEnvironments = ["sandbox", "production"] as const;
+const blogEnvironments = ["sandbox", "production"] as const;
 
 export type BlogEnvironment = (typeof blogEnvironments)[number];
 
@@ -20,7 +20,7 @@ export interface BlogConfiguration {
 	readonly sandboxSubdomainNameServers?: readonly string[] | undefined;
 }
 
-export class MissingEnvironmentVariableError extends Error {
+class MissingEnvironmentVariableError extends Error {
 	public constructor(name: string) {
 		super(`Required environment variable is missing: ${name}`);
 		this.name = "MissingEnvironmentVariableError";
