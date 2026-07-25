@@ -8,7 +8,11 @@ export default defineConfig({
 	fullyParallel: true,
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 2 : 0,
-	reporter: process.env.CI ? "github" : "list",
+	// "github"レポーターは内部でdotレポーターを継承しており、単体で使うと
+	// CIのログが実行したテスト名の見えない"."の羅列になってしまう。
+	// "list"を常に併用し、実行中のテスト名を逐次表示させつつ、
+	// CI実行時のみ"github"を追加してPRへの失敗インラインアノテーションを有効にする。
+	reporter: process.env.CI ? [["list"], ["github"]] : "list",
 	use: {
 		baseURL: process.env.E2E_BASE_URL,
 		trace: "retain-on-failure",
