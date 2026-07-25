@@ -120,6 +120,15 @@ describe("StaticSiteHosting", () => {
 		template.resourceCountIs("Custom::CDKBucketDeployment", 1);
 	});
 
+	test("CloudFront invalidationはハッシュ付きアセット(_astro/)を除いたパスに絞る", () => {
+		template.hasResourceProperties("Custom::CDKBucketDeployment", {
+			DistributionPaths: Match.arrayWith(["/index.html", "/posts/*"]),
+		});
+		template.hasResourceProperties("Custom::CDKBucketDeployment", {
+			DistributionPaths: Match.not(Match.arrayWith(["/_astro/*"])),
+		});
+	});
+
 	test("noIndex: falseの場合、X-Robots-Tagヘッダーを付与しない", () => {
 		template.resourceCountIs("AWS::CloudFront::ResponseHeadersPolicy", 0);
 	});
