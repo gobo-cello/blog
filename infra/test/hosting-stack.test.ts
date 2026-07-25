@@ -18,6 +18,7 @@ interface EnvironmentShape {
 	readonly domainName: string;
 	readonly removalPolicy: RemovalPolicy;
 	readonly autoDeleteObjects: boolean;
+	readonly noIndex: boolean;
 }
 
 const environmentShapes: readonly EnvironmentShape[] = [
@@ -26,12 +27,14 @@ const environmentShapes: readonly EnvironmentShape[] = [
 		domainName: "sandbox.blog.gobo-cello.com",
 		removalPolicy: RemovalPolicy.DESTROY,
 		autoDeleteObjects: true,
+		noIndex: true,
 	},
 	{
 		deploymentEnvironment: "production",
 		domainName: "blog.gobo-cello.com",
 		removalPolicy: RemovalPolicy.RETAIN,
 		autoDeleteObjects: false,
+		noIndex: false,
 	},
 ];
 
@@ -64,6 +67,7 @@ function synthesize(shape: EnvironmentShape) {
 			siteContentPath: fixtureSiteContentPath,
 			removalPolicy: shape.removalPolicy,
 			autoDeleteObjects: shape.autoDeleteObjects,
+			noIndex: shape.noIndex,
 		},
 	);
 
@@ -99,5 +103,26 @@ describe.each(environmentShapes)(
 		test("DistributionDomainNameをCfnOutputとして出力する", () => {
 			template.hasOutput("DistributionDomainName", {});
 		});
+
+		if (shape.noIndex) {
+			test("X-Robots-Tag: noindexヘッダーを付与する", () => {
+				template.hasResourceProperties(
+					"AWS::CloudFront::ResponseHeadersPolicy",
+					{
+						ResponseHeadersPolicyConfig: Match.objectLike({
+							CustomHeadersConfig: {
+								Items: [
+									{ Header: "X-Robots-Tag", Override: true, Value: "noindex" },
+								],
+							},
+						}),
+					},
+				);
+			});
+		} else {
+			test("X-Robots-Tagヘッダーを付与しない", () => {
+				template.resourceCountIs("AWS::CloudFront::ResponseHeadersPolicy", 0);
+			});
+		}
 	},
 );

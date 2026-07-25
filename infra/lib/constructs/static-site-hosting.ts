@@ -6,6 +6,7 @@ import {
 	type ErrorResponse,
 	FunctionCode,
 	FunctionEventType,
+	ResponseHeadersPolicy,
 	ViewerProtocolPolicy,
 } from "aws-cdk-lib/aws-cloudfront";
 import { S3BucketOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
@@ -62,6 +63,7 @@ export interface StaticSiteHostingProps {
 	readonly siteContentPath: string;
 	readonly removalPolicy: RemovalPolicy;
 	readonly autoDeleteObjects: boolean;
+	readonly noIndex: boolean;
 }
 
 export class StaticSiteHosting extends Construct {
@@ -101,6 +103,20 @@ export class StaticSiteHosting extends Construct {
 			{ code: rewriteDirectoryIndexFunctionCode },
 		);
 
+		// robots.txtのDisallowはクロール自体を止めてしまい、検索エンジンが
+		// noindexの指示を読み取れなくなる(Googleも非推奨としている)。
+		// レスポンスヘッダーでのnoindex指示なら、クロールは許可したままインデックス
+		// 登録だけを確実に防げる。
+		const responseHeadersPolicy = props.noIndex
+			? new ResponseHeadersPolicy(this, "NoIndexResponseHeadersPolicy", {
+					customHeadersBehavior: {
+						customHeaders: [
+							{ header: "X-Robots-Tag", value: "noindex", override: true },
+						],
+					},
+				})
+			: undefined;
+
 		this.distribution = new Distribution(this, "Distribution", {
 			defaultBehavior: {
 				origin: S3BucketOrigin.withOriginAccessControl(asIBucket(siteBucket)),
@@ -111,6 +127,7 @@ export class StaticSiteHosting extends Construct {
 						eventType: FunctionEventType.VIEWER_REQUEST,
 					},
 				],
+				...(responseHeadersPolicy ? { responseHeadersPolicy } : {}),
 			},
 			domainNames: [props.domainName],
 			certificate: props.certificate,

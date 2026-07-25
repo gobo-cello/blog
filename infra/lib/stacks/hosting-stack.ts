@@ -19,6 +19,7 @@ export interface HostingStackProps extends StackProps {
 	readonly siteContentPath: string;
 	readonly removalPolicy: RemovalPolicy;
 	readonly autoDeleteObjects: boolean;
+	readonly noIndex: boolean;
 }
 
 export class HostingStack extends Stack {
@@ -35,6 +36,7 @@ export class HostingStack extends Stack {
 			siteContentPath: props.siteContentPath,
 			removalPolicy: props.removalPolicy,
 			autoDeleteObjects: props.autoDeleteObjects,
+			noIndex: props.noIndex,
 		});
 
 		applyPlatformTags(this, createPlatformTags(props.deploymentEnvironment));

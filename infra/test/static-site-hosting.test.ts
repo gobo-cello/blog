@@ -32,6 +32,7 @@ describe("StaticSiteHosting", () => {
 		siteContentPath: fixtureSiteContentPath,
 		removalPolicy: RemovalPolicy.DESTROY,
 		autoDeleteObjects: true,
+		noIndex: false,
 	});
 
 	const template = Template.fromStack(stack);
@@ -117,5 +118,45 @@ describe("StaticSiteHosting", () => {
 
 	test("BucketDeploymentでサイトコンテンツを同期する", () => {
 		template.resourceCountIs("Custom::CDKBucketDeployment", 1);
+	});
+
+	test("noIndex: falseの場合、X-Robots-Tagヘッダーを付与しない", () => {
+		template.resourceCountIs("AWS::CloudFront::ResponseHeadersPolicy", 0);
+	});
+});
+
+describe("StaticSiteHosting(noIndex: true)", () => {
+	const app = new App();
+	const stack = new Stack(app, "TestNoIndexStaticSiteHostingStack", {
+		env: { account: parseAwsAccountId("111111111111"), region: "us-east-1" },
+	});
+	const hostedZone = new HostedZone(stack, "TestHostedZone", {
+		zoneName: "example.com",
+	});
+	const certificate = new Certificate(stack, "TestCertificate", {
+		domainName: "example.com",
+		validation: CertificateValidation.fromDns(hostedZone),
+	});
+
+	new StaticSiteHosting(stack, "StaticSiteHosting", {
+		domainName: "example.com",
+		hostedZone,
+		certificate,
+		siteContentPath: fixtureSiteContentPath,
+		removalPolicy: RemovalPolicy.DESTROY,
+		autoDeleteObjects: true,
+		noIndex: true,
+	});
+
+	const template = Template.fromStack(stack);
+
+	test("X-Robots-Tag: noindexヘッダーを付与する", () => {
+		template.hasResourceProperties("AWS::CloudFront::ResponseHeadersPolicy", {
+			ResponseHeadersPolicyConfig: Match.objectLike({
+				CustomHeadersConfig: {
+					Items: [{ Header: "X-Robots-Tag", Override: true, Value: "noindex" }],
+				},
+			}),
+		});
 	});
 });
