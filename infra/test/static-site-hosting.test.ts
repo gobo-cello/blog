@@ -58,6 +58,11 @@ describe("StaticSiteHosting", () => {
 						ResponseCode: 404,
 						ResponsePagePath: "/404.html",
 					}),
+					Match.objectLike({
+						ErrorCode: 403,
+						ResponseCode: 404,
+						ResponsePagePath: "/404.html",
+					}),
 				]),
 			}),
 		});

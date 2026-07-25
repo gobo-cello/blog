@@ -84,6 +84,14 @@ export class StaticSiteHosting extends Construct {
 					responseHttpStatus: 404,
 					responsePagePath: "/404.html",
 				} satisfies ErrorResponse,
+				{
+					// private bucketをOrigin Access Control経由で参照する場合、
+					// オブジェクトの存在有無を第三者へ漏らさないため、S3は存在しない
+					// キーへのアクセスに404ではなく403 Access Deniedを返す。
+					httpStatus: 403,
+					responseHttpStatus: 404,
+					responsePagePath: "/404.html",
+				} satisfies ErrorResponse,
 			],
 			logBucket: asIBucket(accessLogBucket),
 			logFilePrefix: "cloudfront-access-logs/",
