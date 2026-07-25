@@ -13,6 +13,9 @@ export interface DnsStackProps extends StackProps {
 }
 
 export class DnsStack extends Stack {
+	public readonly hostedZone: HostedZone;
+	public readonly certificate: Certificate;
+
 	public constructor(scope: Construct, id: string, props: DnsStackProps) {
 		super(scope, id, {
 			...props,
@@ -24,8 +27,9 @@ export class DnsStack extends Stack {
 			comment:
 				"blog.gobo-cello.comのhosted zone。sandbox subdomainはblog-sandbox accountのhosted zoneへNS delegationする。",
 		});
+		this.hostedZone = zone;
 
-		new Certificate(this, "BlogCertificate", {
+		this.certificate = new Certificate(this, "BlogCertificate", {
 			domainName: blogDomainName,
 			validation: CertificateValidation.fromDns(zone),
 		});
