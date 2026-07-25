@@ -85,7 +85,7 @@ AWS認証情報そのものはGitHub Secretsへ保存せず、OIDCを使用し�
 
 ## ディレクトリ構成
 
-リポジトリ直下に共通の開発ツール設定を置き、CDK applicationは`infra/`、ブログ本体のアプリケーションは`infra/`と衝突しない`app/`ディレクトリで、それぞれ独立したnpm projectとして管理します。
+リポジトリ直下に共通の開発ツール設定を置き、CDK applicationは`infra/`、ブログ本体のアプリケーションは`infra/`と衝突しない`app/`ディレクトリで、それぞれ独立したnpm projectとして管理します。sandboxへのデプロイ後・production昇格前に実行するE2Eスモークテストは`e2e/`で、同じく独立したnpm projectとして管理します。
 
 ```text
 blog/
@@ -145,6 +145,13 @@ blog/
 │   ├── package.json
 │   ├── package-lock.json
 │   └── tsconfig.json
+├── e2e/
+│   ├── tests/
+│   │   └── smoke.spec.ts
+│   ├── playwright.config.ts
+│   ├── package.json
+│   ├── package-lock.json
+│   └── tsconfig.json
 ├── docs/
 │   ├── architecture.md
 │   └── adr/
@@ -152,7 +159,9 @@ blog/
 │       ├── 0002-github-actions-oidc-deploy.md
 │       ├── 0003-dns-and-certificate.md
 │       ├── 0004-blog-implementation-approach.md
-│       └── 0006-static-site-hosting.md
+│       ├── 0005-sandbox-dns-and-certificate.md
+│       ├── 0006-static-site-hosting.md
+│       └── 0007-e2e-smoke-test.md
 ├── .github/
 │   ├── actions/
 │   │   └── setup-node-npm/
@@ -188,6 +197,8 @@ blog/
 - `app/src/layouts/`・`app/src/pages/`: ページとレイアウト
 - `app/scripts/`: 記事から参照されていない画像を検出するCIチェックスクリプトなど
 
+`e2e/`は、実際にデプロイされたsandbox環境に対するE2Eスモークテストです。設計判断の詳細は[ADR 0007](./docs/adr/0007-e2e-smoke-test.md)を参照してください。`deploy.yml`の`sandbox`→`e2e-test`→`production`のneeds chainで、sandboxデプロイ直後・production昇格前にのみ実行します。sandbox環境への到達性が前提のため、`pr-ci-gate.yml`では型チェックとテストファイルの構文健全性チェック(`playwright test --list`)のみ行います。
+
 使用されていないStack、Construct、directory、設定ファイルは先行して作成しません。
 
 ## 開発環境
@@ -200,7 +211,7 @@ blog/
 - AWS CLI
 - AWS CDK CLI
 
-リポジトリ直下・`infra/`・`app/`はそれぞれ独立したnpm projectです。
+リポジトリ直下・`infra/`・`app/`・`e2e/`はそれぞれ独立したnpm projectです。
 
 リポジトリ直下の依存関係(lint、git hooks)をインストールします。
 
@@ -277,7 +288,7 @@ npm run check
 git hooksには[lefthook](https://github.com/evilmartians/lefthook)を使用します。`npm ci`実行時に`prepare`スクリプトが自動的に`lefthook install`を実行します。
 
 - pre-commit: 変更されたファイルへBiomeを適用します。
-- pre-push: `infra/`でbuild、テスト、`cdk synth`を実行します。
+- pre-push: `infra/`でbuild、テスト、`cdk synth`を実行します。`e2e/`は型チェックのみ実行します(実際のテスト実行はsandbox環境への到達性が前提のため)。
 - commit-msg: Conventional Commitsの形式を検証します。
 
 ## AWS CLIプロファイル

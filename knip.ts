@@ -24,6 +24,7 @@ const config: KnipConfig = {
 			// scripts 経由ではないため tsx プラグインが使用を検出できない。
 			ignoreDependencies: ["tsx"],
 		},
+		e2e: {},
 	},
 };
 

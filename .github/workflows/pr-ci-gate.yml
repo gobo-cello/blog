@@ -80,11 +80,24 @@ jobs:
       - working-directory: app
         run: npm run check:images
 
+  e2e-check-types:
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: ./.github/actions/setup-node-npm
+        with:
+          working-directory: e2e
+      - working-directory: e2e
+        run: npm run check:types
+      - name: Playwrightのテストファイルが正しく認識されることを確認する
+        working-directory: e2e
+        run: npx playwright test --list
+
   knip:
     strategy:
       fail-fast: false
       matrix:
-        workspace: [".", "app", "infra"]
+        workspace: [".", "app", "infra", "e2e"]
         mode: ["default", "production"]
     runs-on: ubuntu-slim
     env:
@@ -157,6 +170,7 @@ jobs:
       - app-check-types
       - app-test
       - app-check-images
+      - e2e-check-types
       - knip
       - cdk-synth
       - cdk-diff
