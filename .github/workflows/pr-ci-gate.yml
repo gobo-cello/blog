@@ -89,7 +89,7 @@ jobs:
           working-directory: e2e
       - working-directory: e2e
         run: npm run check:types
-      - name: Playwrightのテストファイルが正しく認識されることを確認する
+      - name: Verify Playwright test files are recognized
         working-directory: e2e
         run: npx playwright test --list
 
