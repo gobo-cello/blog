@@ -64,6 +64,9 @@ new HostingStack(app, "SandboxHostingStack", {
 	siteContentPath,
 	removalPolicy: RemovalPolicy.DESTROY,
 	autoDeleteObjects: true,
+	// sandboxは検証用であり検索結果に出す必要がないため、X-Robots-Tagで
+	// インデックス登録を防ぐ。
+	noIndex: true,
 });
 
 new HostingStack(app, "ProductionHostingStack", {
@@ -80,4 +83,5 @@ new HostingStack(app, "ProductionHostingStack", {
 	siteContentPath,
 	removalPolicy: RemovalPolicy.RETAIN,
 	autoDeleteObjects: false,
+	noIndex: false,
 });
