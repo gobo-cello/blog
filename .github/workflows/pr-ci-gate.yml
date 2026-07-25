@@ -87,6 +87,8 @@ jobs:
         workspace: [".", "app", "infra"]
         mode: ["default", "production"]
     runs-on: ubuntu-slim
+    env:
+      KNIP_DISABLE_RAW_TRANSFER: '1'
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - uses: ./.github/actions/setup-node-npm
