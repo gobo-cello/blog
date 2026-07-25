@@ -69,6 +69,24 @@ describe("StaticSiteHosting", () => {
 		template.resourceCountIs("AWS::CloudFront::OriginAccessControl", 1);
 	});
 
+	test("サブディレクトリ配下のindex.htmlへ補完するCloudFront Functionをviewer requestに関連付ける", () => {
+		template.resourceCountIs("AWS::CloudFront::Function", 1);
+		template.hasResourceProperties("AWS::CloudFront::Function", {
+			FunctionConfig: Match.objectLike({
+				Runtime: "cloudfront-js-1.0",
+			}),
+		});
+		template.hasResourceProperties("AWS::CloudFront::Distribution", {
+			DistributionConfig: Match.objectLike({
+				DefaultCacheBehavior: Match.objectLike({
+					FunctionAssociations: Match.arrayWith([
+						Match.objectLike({ EventType: "viewer-request" }),
+					]),
+				}),
+			}),
+		});
+	});
+
 	test("CloudFrontの標準アクセスログを別バケットへ出力する", () => {
 		template.hasResourceProperties("AWS::CloudFront::Distribution", {
 			DistributionConfig: Match.objectLike({
