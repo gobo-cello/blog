@@ -10,10 +10,11 @@ const config: KnipConfig = {
 			// knip の Configuration hints は「redundant」と警告するが、指定を外すと
 			// --production の誤検知が復活するため意図的な指定として残す。
 			entry: ["scripts/check-unused-images.ts"],
-			// astro.config.mjs (@astrojs/sitemap) と src/content.config.ts (zod) で
-			// 使用しているが、knip の --production は設定ファイル・content collections
-			// 定義を出荷コードの対象外として扱うため未使用扱いになる誤検知。
-			ignoreDependencies: ["@astrojs/sitemap", "zod"],
+			// astro.config.mjs (@astrojs/sitemap, @tailwindcss/vite) と
+			// src/content.config.ts (zod) で使用しているが、knip の --production は
+			// 設定ファイル・content collections 定義を出荷コードの対象外として扱うため
+			// 未使用扱いになる誤検知。
+			ignoreDependencies: ["@astrojs/sitemap", "@tailwindcss/vite", "zod"],
 		},
 		infra: {
 			// cdk.json の "app" から tsx 経由で実行される CDK エントリポイント。

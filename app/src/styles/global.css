@@ -1,0 +1,22 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+	--color-background: #f7f6f3;
+	--color-foreground: #2e2e2b;
+	--color-muted: #66645f;
+	--color-border: #ddd8cf;
+	--color-accent: #a24e2c;
+
+	--font-sans:
+		-apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN",
+		"Hiragino Sans", "Yu Gothic Medium", "Yu Gothic", "Meiryo", "Segoe UI",
+		Roboto, Helvetica, Arial, sans-serif;
+}
+
+@layer base {
+	body {
+		background-color: var(--color-background);
+		color: var(--color-foreground);
+	}
+}
