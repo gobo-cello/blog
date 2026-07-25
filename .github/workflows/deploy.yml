@@ -96,3 +96,9 @@ jobs:
           AWS_BLOG_SANDBOX_ACCOUNT_ID: ${{ vars.AWS_BLOG_SANDBOX_ACCOUNT_ID }}
           AWS_BLOG_PRODUCTION_ACCOUNT_ID: ${{ vars.AWS_BLOG_PRODUCTION_ACCOUNT_ID }}
           SANDBOX_SUBDOMAIN_NAME_SERVERS: ${{ vars.SANDBOX_SUBDOMAIN_NAME_SERVERS }}
+      - name: Deploy ProductionHostingStack
+        working-directory: infra
+        run: npx cdk deploy ProductionHostingStack --require-approval never
+        env:
+          AWS_BLOG_SANDBOX_ACCOUNT_ID: ${{ vars.AWS_BLOG_SANDBOX_ACCOUNT_ID }}
+          AWS_BLOG_PRODUCTION_ACCOUNT_ID: ${{ vars.AWS_BLOG_PRODUCTION_ACCOUNT_ID }}
