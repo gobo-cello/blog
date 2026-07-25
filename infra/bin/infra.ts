@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import path from "node:path";
 import { App, RemovalPolicy } from "aws-cdk-lib/core";
-import { sandboxBlogDomainName } from "../lib/config/dns";
+import { blogDomainName, sandboxBlogDomainName } from "../lib/config/dns";
 import { loadBlogConfiguration } from "../lib/config/environments";
 import { DnsStack } from "../lib/stacks/dns-stack";
 import { GithubDeployRoleStack } from "../lib/stacks/github-deploy-role-stack";
@@ -13,7 +13,8 @@ const configuration = loadBlogConfiguration();
 
 // app/distへの絶対path。appとinfraは別々のnpm projectであり、
 // 共有の設定helperを持たないため、実行ファイルからの相対pathで解決する。
-const sandboxSiteContentPath = path.join(__dirname, "..", "..", "app", "dist");
+// Sandbox/Production共通。
+const siteContentPath = path.join(__dirname, "..", "..", "app", "dist");
 
 new GithubDeployRoleStack(app, "SandboxGithubDeployRoleStack", {
 	env: configuration.sandbox,
@@ -31,7 +32,7 @@ new GithubDeployRoleStack(app, "ProductionGithubDeployRoleStack", {
 	additionalRegions: ["us-east-1"],
 });
 
-new DnsStack(app, "ProductionDnsStack", {
+const productionDnsStack = new DnsStack(app, "ProductionDnsStack", {
 	// CloudFrontで使用するACM証明書はus-east-1でしか発行できないため、
 	// blog-productionの主リージョン(ap-northeast-1)とは別に固定する。
 	env: {
@@ -60,7 +61,23 @@ new HostingStack(app, "SandboxHostingStack", {
 	domainName: sandboxBlogDomainName,
 	hostedZone: sandboxDnsStack.hostedZone,
 	certificate: sandboxDnsStack.certificate,
-	siteContentPath: sandboxSiteContentPath,
+	siteContentPath,
 	removalPolicy: RemovalPolicy.DESTROY,
 	autoDeleteObjects: true,
+});
+
+new HostingStack(app, "ProductionHostingStack", {
+	// HostingStackはDNS Stackと同じus-east-1に置き、cross-region
+	// cross-stack参照を避ける。
+	env: {
+		account: configuration.production.account,
+		region: "us-east-1",
+	},
+	deploymentEnvironment: "production",
+	domainName: blogDomainName,
+	hostedZone: productionDnsStack.hostedZone,
+	certificate: productionDnsStack.certificate,
+	siteContentPath,
+	removalPolicy: RemovalPolicy.RETAIN,
+	autoDeleteObjects: false,
 });

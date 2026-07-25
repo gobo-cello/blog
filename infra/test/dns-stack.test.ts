@@ -36,6 +36,11 @@ describe("DnsStack", () => {
 		expect(stack.terminationProtection).toBe(true);
 	});
 
+	test("hostedZone・certificateをpublicプロパティとして公開する", () => {
+		expect(stack.hostedZone).toBeDefined();
+		expect(stack.certificate).toBeDefined();
+	});
+
 	test("sandboxSubdomainNameServersが未指定の場合はNS delegationレコードを作成しない", () => {
 		template.resourceCountIs("AWS::Route53::RecordSet", 0);
 	});
