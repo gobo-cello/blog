@@ -6,6 +6,7 @@ on:
     paths:
       - app/**
       - infra/**
+      - e2e/**
       - .github/workflows/deploy.yml
       - .github/actions/setup-node-npm/**
 
