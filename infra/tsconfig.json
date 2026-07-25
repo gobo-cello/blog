@@ -24,7 +24,7 @@
 		"typeRoots": ["./node_modules/@types"],
 		"noEmit": true,
 		"isolatedModules": true,
-		"types": ["jest", "node"]
+		"types": ["node"]
 	},
 	"exclude": ["node_modules", "cdk.out"]
 }

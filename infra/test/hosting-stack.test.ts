@@ -6,6 +6,7 @@ import {
 } from "aws-cdk-lib/aws-certificatemanager";
 import { HostedZone } from "aws-cdk-lib/aws-route53";
 import { App, RemovalPolicy, Stack } from "aws-cdk-lib/core";
+import { describe, expect, test } from "vitest";
 import { parseAwsAccountId } from "../lib/config/accounts";
 import type { BlogEnvironment } from "../lib/config/environments";
 import { HostingStack } from "../lib/stacks/hosting-stack";

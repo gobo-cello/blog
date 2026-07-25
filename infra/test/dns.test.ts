@@ -1,3 +1,4 @@
+import { describe, expect, test } from "vitest";
 import { InvalidNameServersError, parseNameServers } from "../lib/config/dns";
 
 describe("parseNameServers", () => {
