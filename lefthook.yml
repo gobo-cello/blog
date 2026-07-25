@@ -3,7 +3,7 @@ pre-commit:
   commands:
     biome:
       glob: "*.{js,jsx,ts,tsx,json,jsonc}"
-      run: npx biome check --write --no-errors-on-unmatched {staged_files}
+      run: npx biome check --write --unsafe {staged_files}
       stage_fixed: true
 
 pre-push:
@@ -27,6 +27,10 @@ pre-push:
     app-check-images:
       root: "app/"
       run: npm run check:images
+    knip:
+      run: npm run knip
+    knip-production:
+      run: npm run knip:production
 
 commit-msg:
   commands:
