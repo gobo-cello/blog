@@ -1,4 +1,6 @@
 ---
+import "../styles/global.css";
+
 interface Props {
 	title: string;
 	description: string;
@@ -22,11 +24,15 @@ const { title, description } = Astro.props;
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>
-	<body>
-		<header>
-			<a href="/">gobo-cello.com</a>
+	<body class="font-sans">
+		<header class="border-b border-border">
+			<div class="mx-auto max-w-2xl px-4 py-4">
+				<a href="/" class="text-foreground no-underline hover:text-accent">
+					gobo-cello.com
+				</a>
+			</div>
 		</header>
-		<main>
+		<main class="mx-auto max-w-2xl px-4 py-8">
 			<slot />
 		</main>
 	</body>
