@@ -6,6 +6,7 @@ import {
 } from "aws-cdk-lib/aws-certificatemanager";
 import { HostedZone } from "aws-cdk-lib/aws-route53";
 import { App, RemovalPolicy, Stack } from "aws-cdk-lib/core";
+import { describe, test } from "vitest";
 import { parseAwsAccountId } from "../lib/config/accounts";
 import { StaticSiteHosting } from "../lib/constructs/static-site-hosting";
 

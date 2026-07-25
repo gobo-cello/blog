@@ -1,5 +1,6 @@
 import { Match, Template } from "aws-cdk-lib/assertions";
 import { App } from "aws-cdk-lib/core";
+import { describe, expect, test } from "vitest";
 import { parseAwsAccountId } from "../lib/config/accounts";
 import type { BlogEnvironment } from "../lib/config/environments";
 import { GithubDeployRoleStack } from "../lib/stacks/github-deploy-role-stack";

@@ -1,5 +1,6 @@
 import { Match, Template } from "aws-cdk-lib/assertions";
 import { App } from "aws-cdk-lib/core";
+import { describe, expect, test } from "vitest";
 import { parseAwsAccountId } from "../lib/config/accounts";
 import { SandboxDnsStack } from "../lib/stacks/sandbox-dns-stack";
 
