@@ -1,8 +1,11 @@
 import { Duration, type RemovalPolicy } from "aws-cdk-lib";
 import type { ICertificate } from "aws-cdk-lib/aws-certificatemanager";
 import {
+	Function as CloudFrontFunction,
 	Distribution,
 	type ErrorResponse,
+	FunctionCode,
+	FunctionEventType,
 	ViewerProtocolPolicy,
 } from "aws-cdk-lib/aws-cloudfront";
 import { S3BucketOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
@@ -29,6 +32,28 @@ import { Construct } from "constructs";
 function asIBucket(bucket: Bucket): IBucket {
 	return bucket as unknown as IBucket;
 }
+
+/**
+ * CloudFrontの`defaultRootObject`はディストリビューションのルート("/")宛の
+ * リクエストにしか適用されず、サブディレクトリ宛のリクエスト(例: "/posts/foo/")には
+ * 効かない。そのままではS3オリジンに存在しないキー("posts/foo/")を問い合わせて
+ * 403(OAC経由のprivate bucketは404の代わりに403を返す)になり、末尾スラッシュ付きの
+ * ページが軒並み404になる。viewer requestの時点でURIへ"index.html"を補完する。
+ */
+const rewriteDirectoryIndexFunctionCode = FunctionCode.fromInline(`
+function handler(event) {
+	var request = event.request;
+	var uri = request.uri;
+
+	if (uri.endsWith("/")) {
+		request.uri += "index.html";
+	} else if (!uri.includes(".")) {
+		request.uri += "/index.html";
+	}
+
+	return request;
+}
+`);
 
 export interface StaticSiteHostingProps {
 	readonly domainName: string;
@@ -70,10 +95,22 @@ export class StaticSiteHosting extends Construct {
 			accessControl: BucketAccessControl.LOG_DELIVERY_WRITE,
 		});
 
+		const rewriteDirectoryIndexFunction = new CloudFrontFunction(
+			this,
+			"RewriteDirectoryIndexFunction",
+			{ code: rewriteDirectoryIndexFunctionCode },
+		);
+
 		this.distribution = new Distribution(this, "Distribution", {
 			defaultBehavior: {
 				origin: S3BucketOrigin.withOriginAccessControl(asIBucket(siteBucket)),
 				viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+				functionAssociations: [
+					{
+						function: rewriteDirectoryIndexFunction,
+						eventType: FunctionEventType.VIEWER_REQUEST,
+					},
+				],
 			},
 			domainNames: [props.domainName],
 			certificate: props.certificate,
