@@ -57,8 +57,74 @@ jobs:
           AWS_BLOG_SANDBOX_ACCOUNT_ID: ${{ vars.AWS_BLOG_SANDBOX_ACCOUNT_ID }}
           AWS_BLOG_PRODUCTION_ACCOUNT_ID: ${{ vars.AWS_BLOG_PRODUCTION_ACCOUNT_ID }}
 
-  production:
+  e2e-test:
     needs: sandbox
+    runs-on: ubuntu-slim
+    steps:
+      - name: DNS解決を確認する
+        run: |
+          set -euo pipefail
+          remote_ip=$(curl -sS -o /dev/null -w '%{remote_ip}' https://sandbox.blog.gobo-cello.com/)
+          if [ -z "$remote_ip" ]; then
+            echo "DNS解決に失敗しました: sandbox.blog.gobo-cello.com" >&2
+            exit 1
+          fi
+          echo "sandbox.blog.gobo-cello.com -> $remote_ip"
+      - name: アプリケーション配信を確認する
+        run: |
+          set -euo pipefail
+          base_url="https://sandbox.blog.gobo-cello.com"
+
+          # sitemapに書かれたURLはbuild時に固定されたsite("https://blog.gobo-cello.com")の
+          # ホスト名を含む(sandbox/productionでsiteContentPathを共用しているため)。
+          # ホスト名は無視し、pathだけをsandboxのbase_urlに付け替えて確認する。
+          fetch_paths() {
+            curl -sS -f --retry 3 --retry-delay 2 "$1" \
+              | grep -oE '<loc>[^<]+</loc>' \
+              | sed -E 's#</?loc>##g; s#^https?://[^/]+##'
+          }
+
+          shard_paths=()
+          while IFS= read -r line; do
+            shard_paths+=("$line")
+          done < <(fetch_paths "$base_url/sitemap-index.xml")
+
+          if [ "${#shard_paths[@]}" -eq 0 ]; then
+            echo "sitemap-index.xmlからshardを取得できませんでした" >&2
+            exit 1
+          fi
+
+          page_paths=()
+          for shard_path in "${shard_paths[@]}"; do
+            while IFS= read -r line; do
+              page_paths+=("$line")
+            done < <(fetch_paths "$base_url$shard_path")
+          done
+
+          if [ "${#page_paths[@]}" -eq 0 ]; then
+            echo "sitemapからページを取得できませんでした" >&2
+            exit 1
+          fi
+
+          for path in "${page_paths[@]}"; do
+            url="$base_url$path"
+            status=$(curl -sS -o /dev/null -w '%{http_code}' --retry 3 --retry-delay 2 "$url")
+            if [ "$status" != "200" ]; then
+              echo "FAIL: GET $url -> $status (expected 200)" >&2
+              exit 1
+            fi
+            echo "OK: GET $url -> $status"
+          done
+
+          missing_path_status=$(curl -sS -o /dev/null -w '%{http_code}' "$base_url/e2e-test-nonexistent-path/")
+          if [ "$missing_path_status" != "404" ]; then
+            echo "FAIL: 存在しないパスへのアクセスが404を返しませんでした ($missing_path_status)" >&2
+            exit 1
+          fi
+          echo "OK: 存在しないパス -> 404"
+
+  production:
+    needs: [sandbox, e2e-test]
     runs-on: ubuntu-slim
     environment: production
     permissions:
