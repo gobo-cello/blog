@@ -17,12 +17,10 @@ const config: KnipConfig = {
 			ignoreDependencies: ["@astrojs/sitemap", "@tailwindcss/vite", "zod"],
 		},
 		infra: {
-			// cdk.json の "app" から tsx 経由で実行される CDK エントリポイント。
-			// package.json の scripts 経由ではないため tsx プラグインの自動検出対象外 → 明示する。
+			// tsx は cdk.json の "app" から呼ばれており package.json の scripts 経由ではないため、
+			// entry・tsx依存ともに knip のプラグイン自動検出対象外となり、明示する。
 			entry: ["bin/infra.ts!"],
 			project: ["bin/**/*.ts!", "lib/**/*.ts!", "test/**/*.ts"],
-			// tsx は cdk.json の "app" フィールドから呼ばれており、package.json の
-			// scripts 経由ではないため tsx プラグインが使用を検出できない。
 			ignoreDependencies: ["tsx"],
 		},
 		e2e: {},
