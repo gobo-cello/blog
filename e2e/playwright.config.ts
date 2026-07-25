@@ -13,5 +13,12 @@ export default defineConfig({
 		baseURL: process.env.E2E_BASE_URL,
 		trace: "retain-on-failure",
 	},
-	projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+	// バージョン固定に関心がないため、Playwright専用のChromiumをダウンロードせず、
+	// ランナー(ubuntu-latest)にプリインストール済みのsystem Chromeをそのまま使う。
+	projects: [
+		{
+			name: "chrome",
+			use: { ...devices["Desktop Chrome"], channel: "chrome" },
+		},
+	],
 });

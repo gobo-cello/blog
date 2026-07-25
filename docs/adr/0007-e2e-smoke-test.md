@@ -31,9 +31,13 @@ CloudFrontの`defaultRootObject`がルート("/")宛リクエストにしか適�
 
 sitemapに書かれるURLは、build時に固定された`site: "https://blog.gobo-cello.com"`のホスト名を含む(sandbox/productionで`app/dist`を共用しているため)。ホスト名は無視し、pathだけをテスト対象のbase URLに付け替えて確認する。
 
+### ブラウザはPlaywright専用のChromiumをダウンロードせず、system Chromeを使う
+
+このリポジトリの他jobは`ubuntu-slim`(ブラウザ非搭載の軽量ランナー、[actions/runner-images](https://github.com/actions/runner-images/blob/main/images/ubuntu-slim/ubuntu-slim-Readme.md)参照)を使っているが、`e2e-test` jobだけは`ubuntu-latest`(Google Chromeプリインストール済み)を使う。テストで使うブラウザの具体的なバージョンには関心がないため、`playwright.config.ts`の`channel: "chrome"`でランナーにプリインストール済みのsystem Chromeをそのまま使い、Playwright専用のChromiumダウンロード・キャッシュ管理を丸ごと避ける。
+
 ## Consequences
 
-- `deploy.yml`の`e2e-test` jobは、実際のGitHub Actionsランナーへ`e2e/`のコードをcheckoutし、Playwrightのブラウザ(chromiumのみ)をインストールしてから実行するため、`production` jobの実行までに追加の時間がかかる。
+- `e2e-test` jobだけ`runs-on`が他jobと異なる(`ubuntu-slim`ではなく`ubuntu-latest`)。system Chromeのバージョンはランナーイメージの更新に追従し、このリポジトリ側では固定・管理しない。
 - `pr-ci-gate.yml`・`main-ci.yml`・`lefthook.yml`の`pre-push`に、`e2e/`向けの型チェック(と`pr-ci-gate.yml`では`playwright test --list`)を追加した。
 - `knip.ts`の`workspaces`に`e2e: {}`を追加した。
 - `dependabot.yml`に`/e2e`のnpm ecosystemを追加した(あわせて、これまで漏れていた`/app`も追加した)。
