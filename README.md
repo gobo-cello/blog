@@ -89,86 +89,39 @@ AWS認証情報そのものはGitHub Secretsへ保存せず、OIDCを使用し�
 
 ```text
 blog/
-├── infra/
-│   ├── bin/
-│   │   └── infra.ts
+├── infra/                # AWS CDK application(独立npm project)
+│   ├── bin/               # CDK applicationのentry point
 │   ├── lib/
-│   │   ├── config/
-│   │   │   ├── accounts.ts
-│   │   │   ├── cdk-bootstrap.ts
-│   │   │   ├── dns.ts
-│   │   │   ├── environments.ts
-│   │   │   ├── github.ts
-│   │   │   └── tags.ts
-│   │   ├── constructs/
-│   │   │   └── static-site-hosting.ts
-│   │   └── stacks/
-│   │       ├── dns-stack.ts
-│   │       ├── github-deploy-role-stack.ts
-│   │       ├── hosting-stack.ts
-│   │       └── sandbox-dns-stack.ts
-│   ├── test/
-│   │   ├── fixtures/
-│   │   │   └── static-site/
-│   │   ├── accounts.test.ts
-│   │   ├── github-deploy-role-stack.test.ts
-│   │   ├── hosting-stack.test.ts
-│   │   └── static-site-hosting.test.ts
+│   │   ├── config/         # secretを含まない環境設定
+│   │   ├── constructs/     # 複数のAWS resourceからなる論理的な機能単位
+│   │   └── stacks/         # AWS accountまたはdeployment boundaryごとのStack
+│   ├── test/               # CDK templateおよびConstructのテスト
 │   ├── cdk.json
-│   ├── jest.config.js
 │   ├── package.json
-│   ├── package-lock.json
 │   ├── tsconfig.json
 │   ├── .env.example
 │   └── README.md
-├── app/
+├── app/                   # Astro(静的サイト生成)によるブログ本体(独立npm project)
 │   ├── src/
-│   │   ├── content/
-│   │   │   └── blog/
-│   │   │       └── <slug>/
-│   │   │           ├── index.md
-│   │   │           └── *.jpg,png
-│   │   ├── content.config.ts
+│   │   ├── content/blog/<slug>/  # 記事本体(Markdown)と、記事ごとにcolocationされた画像
+│   │   ├── content.config.ts      # content collectionのschema定義(Zod)
 │   │   ├── layouts/
-│   │   │   └── BaseLayout.astro
 │   │   └── pages/
-│   │       ├── index.astro
-│   │       ├── posts/[slug].astro
-│   │       ├── categories/[category].astro
-│   │       ├── tags/[tag].astro
-│   │       ├── rss.xml.ts
-│   │       └── 404.astro
-│   ├── scripts/
-│   │   └── check-unused-images.ts
-│   ├── test/
+│   ├── scripts/            # 記事から参照されていない画像を検出するCIチェックスクリプトなど
 │   ├── astro.config.mjs
 │   ├── package.json
-│   ├── package-lock.json
 │   └── tsconfig.json
-├── e2e/
+├── e2e/                   # デプロイ後のsandbox環境向けE2Eスモークテスト(独立npm project)
 │   ├── tests/
-│   │   └── smoke.spec.ts
 │   ├── playwright.config.ts
 │   ├── package.json
-│   ├── package-lock.json
 │   └── tsconfig.json
 ├── docs/
 │   ├── architecture.md
-│   └── adr/
-│       ├── 0001-repository-boundary.md
-│       ├── 0002-github-actions-oidc-deploy.md
-│       ├── 0003-dns-and-certificate.md
-│       ├── 0004-blog-implementation-approach.md
-│       ├── 0005-sandbox-dns-and-certificate.md
-│       ├── 0006-static-site-hosting.md
-│       └── 0007-e2e-smoke-test.md
+│   └── adr/                # Architecture Decision Record(連番ファイルとして追加)
 ├── .github/
 │   ├── actions/
-│   │   └── setup-node-npm/
 │   ├── workflows/
-│   │   ├── main-ci.yml
-│   │   ├── pr-ci-gate.yml
-│   │   └── deploy.yml
 │   ├── copilot-instructions.md
 │   └── dependabot.yml
 ├── .claude/
@@ -181,6 +134,8 @@ blog/
 ├── README.md
 └── SECURITY.md
 ```
+
+このツリーは各ディレクトリの役割を示す骨格であり、網羅的なファイル一覧ではありません。ADR、記事、Stack、テストファイルなど、実装や記事の追加に伴って増減するファイルは列挙していないため、それらを追加・変更してもこの一覧を更新する必要はありません。実際に存在するファイルは各ディレクトリを直接参照してください。
 
 `infra/`配下は次の責務で分割しています。
 
