@@ -27,6 +27,9 @@ pre-push:
     app-check-images:
       root: "app/"
       run: npm run check:images
+    e2e-check-types:
+      root: "e2e/"
+      run: npm run check:types
     knip:
       run: npm run knip
     knip-production:

@@ -6,6 +6,7 @@ on:
     paths:
       - app/**
       - infra/**
+      - e2e/**
       - .github/workflows/deploy.yml
       - .github/actions/setup-node-npm/**
 
@@ -57,8 +58,25 @@ jobs:
           AWS_BLOG_SANDBOX_ACCOUNT_ID: ${{ vars.AWS_BLOG_SANDBOX_ACCOUNT_ID }}
           AWS_BLOG_PRODUCTION_ACCOUNT_ID: ${{ vars.AWS_BLOG_PRODUCTION_ACCOUNT_ID }}
 
-  production:
+  e2e-test:
     needs: sandbox
+    # ubuntu-slimと異なりGoogle Chromeがプリインストール済みのため、
+    # playwright.config.tsのchannel: "chrome"でこれをそのまま使い、
+    # Playwright専用のChromiumダウンロードを避ける。
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: ./.github/actions/setup-node-npm
+        with:
+          working-directory: e2e
+      - name: Run E2E smoke test against sandbox
+        working-directory: e2e
+        run: npm test
+        env:
+          E2E_BASE_URL: https://sandbox.blog.gobo-cello.com
+
+  production:
+    needs: [sandbox, e2e-test]
     runs-on: ubuntu-slim
     environment: production
     permissions:
