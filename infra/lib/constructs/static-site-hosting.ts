@@ -1,3 +1,5 @@
+import { readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { Duration, type RemovalPolicy } from "aws-cdk-lib";
 import type { ICertificate } from "aws-cdk-lib/aws-certificatemanager";
 import {
@@ -55,6 +57,26 @@ function handler(event) {
 	return request;
 }
 `);
+
+const hashedAssetDirectoryName = "_astro";
+
+/**
+ * "_astro/"配下はAstroがビルド時にコンテンツハッシュ付きファイル名で出力する
+ * 不変アセットであり、内容が変わればパス自体が変わるため無効化しなくても
+ * 新旧バージョンのキャッシュキーが衝突しない(ADR 0008)。無効化対象をハッシュの
+ * 付かないファイル(HTML・sitemap・favicon等)に絞ることで、デプロイ直後に古い
+ * HTMLを参照しているクライアントが、エッジにキャッシュ済みの旧アセットをTTLが
+ * 残っている間は引き続き取得できるようにする。
+ */
+function nonHashedAssetInvalidationPaths(siteContentPath: string): string[] {
+	return readdirSync(siteContentPath)
+		.filter((entry) => entry !== hashedAssetDirectoryName)
+		.map((entry) =>
+			statSync(join(siteContentPath, entry)).isDirectory()
+				? `/${entry}/*`
+				: `/${entry}`,
+		);
+}
 
 export interface StaticSiteHostingProps {
 	readonly domainName: string;
@@ -155,7 +177,7 @@ export class StaticSiteHosting extends Construct {
 			sources: [Source.asset(props.siteContentPath)],
 			destinationBucket: asIBucket(siteBucket),
 			distribution: this.distribution,
-			distributionPaths: ["/*"],
+			distributionPaths: nonHashedAssetInvalidationPaths(props.siteContentPath),
 		});
 
 		new ARecord(this, "SiteAliasRecord", {
