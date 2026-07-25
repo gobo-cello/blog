@@ -13,7 +13,9 @@ CloudFrontの`defaultRootObject`がルート("/")宛リクエストにしか適�
 
 ### テストフレームワークにPlaywrightを使う
 
-最初はbash+curlのインラインスクリプトとして実装したが、アサーションの可読性・失敗時のレポーティング(trace・スクリーンショット)・実ブラウザでのレンダリング確認(単なるHTTPステータスだけでなく、実際にページが表示されることの確認)を優先し、`@playwright/test`に置き換えた。`app/`がすでにAstro/TypeScriptのエコシステムであることとも親和性が高い。
+最初はbash+curlのインラインスクリプトとして実装したが、アサーションの可読性・失敗時のレポーティング(trace・スクリーンショット)を優先し、`@playwright/test`に置き換えた。`app/`がすでにAstro/TypeScriptのエコシステムであることとも親和性が高い。
+
+現状のテストは`page.goto()`のレスポンスstatusを確認するのみで、実際に描画された内容(タイトル・見出しなど)へのアサーションは行っていない。この点はcurlでのHTTPステータス確認と実質的な検証範囲は変わらないが、実ブラウザで読み込むこと自体は、リソース取得失敗など一部の問題をtrace経由で事後確認しやすくする。表示内容そのものの検証が必要になった場合は、テストを拡張する。
 
 ### `e2e/`を独立したnpm projectにする
 
@@ -30,6 +32,10 @@ CloudFrontの`defaultRootObject`がルート("/")宛リクエストにしか適�
 - 404確認: 存在しないパスへのアクセスが404を返すことを確認する([ADR 0006](./0006-static-site-hosting.md)のCloudFront `errorResponses`の403→404マッピングに対するリグレッションガード)。
 
 sitemapに書かれるURLは、build時に固定された`site: "https://blog.gobo-cello.com"`のホスト名を含む(sandbox/productionで`app/dist`を共用しているため)。ホスト名は無視し、pathだけをテスト対象のbase URLに付け替えて確認する。
+
+### `deploy.yml`のトリガーpathsに`e2e/**`を含める
+
+`deploy.yml`の`on.push.paths`は元々`app/**`・`infra/**`のみで、`e2e/**`を含んでいなかった。この場合、`e2e/`だけの変更は`deploy.yml`自体を実行しないため、次にapp/infraが変わって初めて新しいe2eコードが実際にsandboxへ対して実行されることになり、`e2e-test` jobが失敗した際にsandbox環境側の変更が原因なのか、e2eのテストコード側の変更が原因なのか切り分けられなくなる。`sandbox`/`production`の`cdk deploy`は差分がなければno-opで完了するため、`e2e/**`をpathsに含めても実行コストは小さい。この切り分けやすさを優先し、`e2e/**`をpathsに追加した。
 
 ### ブラウザはPlaywright専用のChromiumをダウンロードせず、system Chromeを使う
 
