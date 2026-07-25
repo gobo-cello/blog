@@ -98,7 +98,12 @@ jobs:
           SANDBOX_SUBDOMAIN_NAME_SERVERS: ${{ vars.SANDBOX_SUBDOMAIN_NAME_SERVERS }}
       - name: Deploy ProductionHostingStack
         working-directory: infra
+        # ProductionHostingStackはProductionDnsStackのhostedZone/certificateを
+        # cross-stack参照するため、このcdk deployは依存先のProductionDnsStackも
+        # 再合成・再デプロイする。SANDBOX_SUBDOMAIN_NAME_SERVERSを渡さないと、
+        # ProductionDnsStackのNS委譲レコードが未指定と判定され削除されてしまう。
         run: npx cdk deploy ProductionHostingStack --require-approval never
         env:
           AWS_BLOG_SANDBOX_ACCOUNT_ID: ${{ vars.AWS_BLOG_SANDBOX_ACCOUNT_ID }}
           AWS_BLOG_PRODUCTION_ACCOUNT_ID: ${{ vars.AWS_BLOG_PRODUCTION_ACCOUNT_ID }}
+          SANDBOX_SUBDOMAIN_NAME_SERVERS: ${{ vars.SANDBOX_SUBDOMAIN_NAME_SERVERS }}
