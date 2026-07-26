@@ -1,6 +1,6 @@
-# gobo-cello.com blog app
+# example.com blog app
 
-`gobo-cello.com` のブログアプリケーション。[Astro](https://astro.build) で構築している。
+`example.com` のブログアプリケーション。[Astro](https://astro.build) で構築している。
 
 ## ディレクトリ構成
 

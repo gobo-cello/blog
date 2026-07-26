@@ -43,7 +43,7 @@ Astro 6以降のContent Layer API(`defineCollection` + `glob()` loader)を用い
 - RSS: `/rss.xml`
 - サイトマップ: `/sitemap-index.xml`(`@astrojs/sitemap`のデフォルト)
 
-ドメイン自体が`blog.gobo-cello.com`であるため、`/blog/`のようなprefixは付けない。カテゴリは記事ごとに1つ(主分類)、タグは複数可(横断的なトピック分類)というシンプルな2軸タクソノミーにする。
+ドメイン自体が`blog.example.com`であるため、`/blog/`のようなprefixは付けない。カテゴリは記事ごとに1つ(主分類)、タグは複数可(横断的なトピック分類)というシンプルな2軸タクソノミーにする。
 
 ### ⑦ テストランナー: `app/`だけVitestを使う
 

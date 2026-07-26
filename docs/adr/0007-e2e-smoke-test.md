@@ -31,7 +31,7 @@ CloudFrontの`defaultRootObject`がルート("/")宛リクエストにしか適�
 - ページ配信: `sitemap-index.xml`を起点に動的にURLを取得し、全ページが200を返すことを確認する。記事の追加・削除・改名があってもテストのメンテナンスが不要になる。
 - 404確認: 存在しないパスへのアクセスが404を返すことを確認する([ADR 0006](./0006-static-site-hosting.md)のCloudFront `errorResponses`の403→404マッピングに対するリグレッションガード)。
 
-sitemapに書かれるURLは、build時に固定された`site: "https://blog.gobo-cello.com"`のホスト名を含む(sandbox/productionで`app/dist`を共用しているため)。ホスト名は無視し、pathだけをテスト対象のbase URLに付け替えて確認する。
+sitemapに書かれるURLは、build時に固定された`site: "https://blog.example.com"`のホスト名を含む(sandbox/productionで`app/dist`を共用しているため)。ホスト名は無視し、pathだけをテスト対象のbase URLに付け替えて確認する。
 
 ### `deploy.yml`のトリガーpathsに`e2e/**`を含める
 

@@ -1,12 +1,12 @@
 # blog
 
-`gobo-cello.com`のブログアプリケーション、コンテンツ、ワークロード用Infrastructure as Codeリポジトリです。
+`example.com`のブログアプリケーション、コンテンツ、ワークロード用Infrastructure as Codeリポジトリです。
 
 このリポジトリはpublicです。コード、設定、ドキュメント、Issue、Pull Requestなど、リポジトリ内のすべての情報は第三者から閲覧される前提で管理します。
 
 ## 目的
 
-`gobo-cello.com`のブログを配信するアプリケーション、コンテンツ、ワークロード用インフラストラクチャをこのリポジトリで管理します。
+`example.com`のブログを配信するアプリケーション、コンテンツ、ワークロード用インフラストラクチャをこのリポジトリで管理します。
 
 AWS Organizations全体の共通基盤(監査ログの一元管理、Service Control Policyなど)は、ライフサイクルとfailure domainが異なるため、別のInfrastructure as Codeリポジトリで管理します。
 
@@ -311,13 +311,13 @@ GitHub ActionsからAWSへは、OIDCによる一時認証だけを使用しま�
 
 ## ドメインとDNS
 
-`blog.gobo-cello.com`のhosted zoneと、CloudFront用のACM証明書(DNS検証)を`ProductionDnsStack`で管理しています。`sandbox.blog.gobo-cello.com`は同様に`SandboxDnsStack`で管理しています。設計の詳細は[docs/architecture.md](./docs/architecture.md)と[ADR 0003](./docs/adr/0003-dns-and-certificate.md)・[ADR 0005](./docs/adr/0005-sandbox-dns-and-certificate.md)を参照してください。
+`blog.example.com`のhosted zoneと、CloudFront用のACM証明書(DNS検証)を`ProductionDnsStack`で管理しています。`sandbox.blog.example.com`は同様に`SandboxDnsStack`で管理しています。設計の詳細は[docs/architecture.md](./docs/architecture.md)と[ADR 0003](./docs/adr/0003-dns-and-certificate.md)・[ADR 0005](./docs/adr/0005-sandbox-dns-and-certificate.md)を参照してください。
 
-CloudFrontで使用するACM証明書は`us-east-1`でしか発行できないため、`blog-production`accountの主リージョン(`ap-northeast-1`)とは別に`us-east-1`のCDK bootstrapが必要です。また、apex hosted zone(`gobo-cello.com`)は`aws-platform`リポジトリが管理しており、cross-repositoryでのname server受け渡しが必要なため、次の順序で1回だけ手動セットアップします。
+CloudFrontで使用するACM証明書は`us-east-1`でしか発行できないため、`blog-production`accountの主リージョン(`ap-northeast-1`)とは別に`us-east-1`のCDK bootstrapが必要です。また、apex hosted zone(`example.com`)は`aws-platform`リポジトリが管理しており、cross-repositoryでのname server受け渡しが必要なため、次の順序で1回だけ手動セットアップします。
 
 1. `aws-platform`リポジトリで、apex hosted zone(`DnsStack`)を先にdeployし、出力された`ApexHostedZoneNameServers`を控えます。
 
-2. お名前.comの管理画面で、`gobo-cello.com`のネームサーバーを1.の値へ変更します。反映には時間がかかる場合があります。
+2. お名前.comの管理画面で、`example.com`のネームサーバーを1.の値へ変更します。反映には時間がかかる場合があります。
 
 3. `blog-production`accountで、`us-east-1`のCDK bootstrapを実行します。
 
@@ -335,11 +335,11 @@ CloudFrontで使用するACM証明書は`us-east-1`でしか発行できない�
 
 5. deploy出力の`BlogHostedZoneNameServers`を、`aws-platform`リポジトリの`BLOG_SUBDOMAIN_NAME_SERVERS`環境変数に設定し、`aws-platform`側の`DnsStack`を再deployします。
 
-6. `dig blog.gobo-cello.com NS`で委譲が反映されていること、`aws acm describe-certificate`等で証明書が`ISSUED`になっていることを確認します。
+6. `dig blog.example.com NS`で委譲が反映されていること、`aws acm describe-certificate`等で証明書が`ISSUED`になっていることを確認します。
 
 7. 動作確認できたら、`deploy.yml`の`production` jobへ`ProductionDnsStack`を追加するコミットをmergeします(初回は手動deployで検証してからCIへ組み込みます)。
 
-`sandbox.blog.gobo-cello.com`は`blog.gobo-cello.com`のhosted zoneからNS delegationを受けるため、上記1〜7の後に続けて次の手順を1回だけ手動セットアップします。
+`sandbox.blog.example.com`は`blog.example.com`のhosted zoneからNS delegationを受けるため、上記1〜7の後に続けて次の手順を1回だけ手動セットアップします。
 
 8. `blog-sandbox`accountで、`us-east-1`のCDK bootstrapを実行します。
 
@@ -362,7 +362,7 @@ CloudFrontで使用するACM証明書は`us-east-1`でしか発行できない�
     npx cdk deploy ProductionDnsStack --profile blog-production
     ```
 
-11. `dig sandbox.blog.gobo-cello.com NS`で委譲が反映されていること、`aws acm describe-certificate`等で証明書が`ISSUED`になっていることを確認します。
+11. `dig sandbox.blog.example.com NS`で委譲が反映されていること、`aws acm describe-certificate`等で証明書が`ISSUED`になっていることを確認します。
 
 12. 動作確認できたら、`deploy.yml`の`sandbox` jobへ`SandboxDnsStack`を追加するコミットをmergeします。
 
