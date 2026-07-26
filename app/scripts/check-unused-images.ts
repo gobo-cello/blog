@@ -18,11 +18,11 @@ function isImageFile(fileName: string): boolean {
 	);
 }
 
-export function findUnusedImages(blogContentDir: string): string[] {
+export function findUnusedImages(contentDir: string): string[] {
 	const unusedImagePaths: string[] = [];
 
-	for (const entryName of readdirSync(blogContentDir)) {
-		const entryPath = join(blogContentDir, entryName);
+	for (const entryName of readdirSync(contentDir)) {
+		const entryPath = join(contentDir, entryName);
 		if (!statSync(entryPath).isDirectory()) {
 			continue;
 		}
@@ -50,14 +50,14 @@ const isMainModule =
 	import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (isMainModule) {
-	const blogContentDir = join(
+	const postsContentDir = join(
 		import.meta.dirname,
 		"..",
 		"src",
 		"content",
-		"blog",
+		"posts",
 	);
-	const unusedImagePaths = findUnusedImages(blogContentDir);
+	const unusedImagePaths = findUnusedImages(postsContentDir);
 
 	if (unusedImagePaths.length > 0) {
 		console.error("未参照の画像が見つかりました:");
