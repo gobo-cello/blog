@@ -13,7 +13,6 @@ export async function GET(context: APIContext) {
 			new URL(`https://${process.env.BLOG_DOMAIN_NAME ?? "blog.example.com"}`),
 		items: posts.map((post) => ({
 			title: post.data.title,
-			description: post.data.description,
 			pubDate: post.data.date,
 			link: `/posts/${post.id}/`,
 		})),
