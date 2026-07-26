@@ -3,7 +3,7 @@ import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 
 export async function GET(context: APIContext) {
-	const posts = await getCollection("blog", ({ data }) => !data.draft);
+	const posts = await getCollection("posts", ({ data }) => !data.draft);
 
 	return rss({
 		title: "gobo-cello.com",
