@@ -1,6 +1,5 @@
 ---
 title: "ブログを開設しました。"
-description: ""
 date: 2026-07-25
 category: "meta"
 ---
