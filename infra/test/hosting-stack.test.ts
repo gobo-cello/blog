@@ -6,7 +6,7 @@ import {
 } from "aws-cdk-lib/aws-certificatemanager";
 import { HostedZone } from "aws-cdk-lib/aws-route53";
 import { App, RemovalPolicy, Stack } from "aws-cdk-lib/core";
-import { describe, expect, test } from "vitest";
+import { describe, expect, it } from "vitest";
 import { parseAwsAccountId } from "../lib/config/accounts";
 import type { BlogEnvironment } from "../lib/config/environments";
 import { HostingStack } from "../lib/stacks/hosting-stack";
@@ -79,7 +79,7 @@ describe.each(environmentShapes)(
 	(shape) => {
 		const { stack, template } = synthesize(shape);
 
-		test("CloudFront Distributionを1つ作成する", () => {
+		it("CloudFront Distributionを1つ作成する", () => {
 			template.resourceCountIs("AWS::CloudFront::Distribution", 1);
 			template.hasResourceProperties("AWS::CloudFront::Distribution", {
 				DistributionConfig: Match.objectLike({
@@ -88,7 +88,7 @@ describe.each(environmentShapes)(
 			});
 		});
 
-		test(`removalPolicy(${shape.removalPolicy})をS3 bucketへ適用する`, () => {
+		it(`removalPolicy(${shape.removalPolicy})をS3 bucketへ適用する`, () => {
 			const expectedDeletionPolicy =
 				shape.removalPolicy === RemovalPolicy.RETAIN ? "Retain" : "Delete";
 			template.hasResource("AWS::S3::Bucket", {
@@ -96,16 +96,16 @@ describe.each(environmentShapes)(
 			});
 		});
 
-		test("Stack termination protectionを有効にする", () => {
+		it("Stack termination protectionを有効にする", () => {
 			expect(stack.terminationProtection).toBe(true);
 		});
 
-		test("DistributionDomainNameをCfnOutputとして出力する", () => {
+		it("DistributionDomainNameをCfnOutputとして出力する", () => {
 			template.hasOutput("DistributionDomainName", {});
 		});
 
 		if (shape.noIndex) {
-			test("X-Robots-Tag: noindexヘッダーを付与する", () => {
+			it("X-Robots-Tag: noindexヘッダーを付与する", () => {
 				template.hasResourceProperties(
 					"AWS::CloudFront::ResponseHeadersPolicy",
 					{
@@ -120,7 +120,7 @@ describe.each(environmentShapes)(
 				);
 			});
 		} else {
-			test("X-Robots-Tagヘッダーを付与しない", () => {
+			it("X-Robots-Tagヘッダーを付与しない", () => {
 				template.resourceCountIs("AWS::CloudFront::ResponseHeadersPolicy", 0);
 			});
 		}

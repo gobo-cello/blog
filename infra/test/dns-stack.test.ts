@@ -1,6 +1,6 @@
 import { Match, Template } from "aws-cdk-lib/assertions";
 import { App } from "aws-cdk-lib/core";
-import { describe, expect, test } from "vitest";
+import { describe, expect, it } from "vitest";
 import { parseAwsAccountId } from "../lib/config/accounts";
 import { DnsStack } from "../lib/stacks/dns-stack";
 
@@ -11,14 +11,14 @@ describe("DnsStack", () => {
 	});
 	const template = Template.fromStack(stack);
 
-	test("blog.gobo-cello.com用のhosted zoneを作成する", () => {
+	it("blog.gobo-cello.com用のhosted zoneを作成する", () => {
 		template.resourceCountIs("AWS::Route53::HostedZone", 1);
 		template.hasResourceProperties("AWS::Route53::HostedZone", {
 			Name: "blog.gobo-cello.com.",
 		});
 	});
 
-	test("hosted zoneでDNS検証するACM証明書を作成する", () => {
+	it("hosted zoneでDNS検証するACM証明書を作成する", () => {
 		template.hasResourceProperties("AWS::CertificateManager::Certificate", {
 			DomainName: "blog.gobo-cello.com",
 			ValidationMethod: "DNS",
@@ -33,16 +33,16 @@ describe("DnsStack", () => {
 		});
 	});
 
-	test("Stack termination protectionを有効にする", () => {
+	it("Stack termination protectionを有効にする", () => {
 		expect(stack.terminationProtection).toBe(true);
 	});
 
-	test("hostedZone・certificateをpublicプロパティとして公開する", () => {
+	it("hostedZone・certificateをpublicプロパティとして公開する", () => {
 		expect(stack.hostedZone).toBeDefined();
 		expect(stack.certificate).toBeDefined();
 	});
 
-	test("sandboxSubdomainNameServersが未指定の場合はNS delegationレコードを作成しない", () => {
+	it("sandboxSubdomainNameServersが未指定の場合はNS delegationレコードを作成しない", () => {
 		template.resourceCountIs("AWS::Route53::RecordSet", 0);
 	});
 });
@@ -55,7 +55,7 @@ describe("DnsStack (sandboxSubdomainNameServers指定時)", () => {
 	});
 	const template = Template.fromStack(stack);
 
-	test("sandbox宛のNS delegationレコードを作成する", () => {
+	it("sandbox宛のNS delegationレコードを作成する", () => {
 		template.hasResourceProperties("AWS::Route53::RecordSet", {
 			Name: "sandbox.blog.gobo-cello.com.",
 			Type: "NS",
