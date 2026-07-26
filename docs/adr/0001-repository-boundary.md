@@ -11,9 +11,9 @@ platform側の変更(CloudTrail、IAM Access Analyzer、Service Control Policy�
 
 ## Decision
 
-blog applicationとそのworkload infrastructureは、`gobo-cello-blog`リポジトリで管理する。
+blog applicationとそのworkload infrastructureは、`gobo-cello/blog`リポジトリで管理する。
 
-organization-level infrastructure(AWS Organizations、Management account、CloudTrailなどの組織横断基盤)は、別の`gobo-cello-aws-platform`リポジトリで管理する。
+organization-level infrastructure(AWS Organizations、Management account、CloudTrailなどの組織横断基盤)は、別の`gobo-cello/aws-platform`リポジトリで管理する。
 
 ## Consequences
 
