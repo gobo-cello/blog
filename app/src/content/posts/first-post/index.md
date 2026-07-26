@@ -43,7 +43,7 @@ category: "meta"
 
 - ドメイン基盤
   - https://github.com/gobo-cello/aws-platform
-- ブログインフラ・アプリ
+- ブログ
   - https://github.com/gobo-cello/blog
 
 ## このブログで何を書いていくのか

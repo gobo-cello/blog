@@ -8,12 +8,17 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
 ---
 
 <BaseLayout title="gobo-cello.com" description="gobo-cello.comのブログです。">
-	<ul>
+	<ul class="list-none divide-y divide-border p-0">
 		{
 			posts.map((post) => (
-				<li>
-					<a href={`/posts/${post.id}/`}>{post.data.title}</a>
-					<p>{post.data.description}</p>
+				<li class="py-4 first:pt-0">
+					<a
+						href={`/posts/${post.id}/`}
+						class="text-lg font-semibold text-foreground no-underline hover:text-accent"
+					>
+						{post.data.title}
+					</a>
+					<p class="mt-1 text-sm text-muted">{post.data.description}</p>
 				</li>
 			))
 		}
