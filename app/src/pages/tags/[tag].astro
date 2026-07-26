@@ -18,12 +18,17 @@ const { posts } = Astro.props;
 ---
 
 <BaseLayout title={`タグ: ${tag}`} description={`${tag}タグの記事一覧です。`}>
-	<h1>#{tag}</h1>
-	<ul>
+	<h1 class="text-2xl font-bold">#{tag}</h1>
+	<ul class="mt-4 list-none divide-y divide-border p-0">
 		{
 			posts.map((post) => (
-				<li>
-					<a href={`/posts/${post.id}/`}>{post.data.title}</a>
+				<li class="py-3 first:pt-0">
+					<a
+						href={`/posts/${post.id}/`}
+						class="text-foreground no-underline hover:text-accent"
+					>
+						{post.data.title}
+					</a>
 				</li>
 			))
 		}
