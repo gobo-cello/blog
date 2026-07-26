@@ -6,9 +6,11 @@ export async function GET(context: APIContext) {
 	const posts = await getCollection("posts", ({ data }) => !data.draft);
 
 	return rss({
-		title: "gobo-cello.com",
-		description: "gobo-cello.comのブログです。",
-		site: context.site ?? new URL("https://blog.gobo-cello.com"),
+		title: "ごぼうのブログ",
+		description: "ごぼうのブログです。",
+		site:
+			context.site ??
+			new URL(`https://${process.env.BLOG_DOMAIN_NAME ?? "blog.example.com"}`),
 		items: posts.map((post) => ({
 			title: post.data.title,
 			description: post.data.description,

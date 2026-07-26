@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import path from "node:path";
 import { App, RemovalPolicy } from "aws-cdk-lib/core";
-import { blogDomainName, sandboxBlogDomainName } from "../lib/config/dns";
 import { loadBlogConfiguration } from "../lib/config/environments";
 import { DnsStack } from "../lib/stacks/dns-stack";
 import { GithubDeployRoleStack } from "../lib/stacks/github-deploy-role-stack";
@@ -39,6 +38,7 @@ const productionDnsStack = new DnsStack(app, "ProductionDnsStack", {
 		account: configuration.production.account,
 		region: "us-east-1",
 	},
+	domainName: configuration.blogDomainName,
 	sandboxSubdomainNameServers: configuration.sandboxSubdomainNameServers,
 });
 
@@ -48,6 +48,7 @@ const sandboxDnsStack = new SandboxDnsStack(app, "SandboxDnsStack", {
 		account: configuration.sandbox.account,
 		region: "us-east-1",
 	},
+	domainName: configuration.sandboxBlogDomainName,
 });
 
 new HostingStack(app, "SandboxHostingStack", {
@@ -58,7 +59,7 @@ new HostingStack(app, "SandboxHostingStack", {
 		region: "us-east-1",
 	},
 	deploymentEnvironment: "sandbox",
-	domainName: sandboxBlogDomainName,
+	domainName: configuration.sandboxBlogDomainName,
 	hostedZone: sandboxDnsStack.hostedZone,
 	certificate: sandboxDnsStack.certificate,
 	siteContentPath,
@@ -77,7 +78,7 @@ new HostingStack(app, "ProductionHostingStack", {
 		region: "us-east-1",
 	},
 	deploymentEnvironment: "production",
-	domainName: blogDomainName,
+	domainName: configuration.blogDomainName,
 	hostedZone: productionDnsStack.hostedZone,
 	certificate: productionDnsStack.certificate,
 	siteContentPath,

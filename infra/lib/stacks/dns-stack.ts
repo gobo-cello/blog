@@ -5,10 +5,10 @@ import {
 } from "aws-cdk-lib/aws-certificatemanager";
 import { HostedZone, NsRecord } from "aws-cdk-lib/aws-route53";
 import type { Construct } from "constructs";
-import { blogDomainName } from "../config/dns";
 import { applyPlatformTags, createPlatformTags } from "../config/tags";
 
 export interface DnsStackProps extends StackProps {
+	readonly domainName: string;
 	readonly sandboxSubdomainNameServers?: readonly string[] | undefined;
 }
 
@@ -23,14 +23,14 @@ export class DnsStack extends Stack {
 		});
 
 		const zone = new HostedZone(this, "BlogHostedZone", {
-			zoneName: blogDomainName,
+			zoneName: props.domainName,
 			comment:
-				"blog.gobo-cello.comのhosted zone。sandbox subdomainはblog-sandbox accountのhosted zoneへNS delegationする。",
+				"blogのhosted zone。sandbox subdomainはblog-sandbox accountのhosted zoneへNS delegationする。",
 		});
 		this.hostedZone = zone;
 
 		this.certificate = new Certificate(this, "BlogCertificate", {
-			domainName: blogDomainName,
+			domainName: props.domainName,
 			validation: CertificateValidation.fromDns(zone),
 		});
 

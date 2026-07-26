@@ -1,5 +1,9 @@
 import { type AwsAccountId, parseAwsAccountId } from "./accounts";
-import { parseNameServers } from "./dns";
+import {
+	parseBlogDomainName,
+	parseNameServers,
+	sandboxDomainNameOf,
+} from "./dns";
 
 const supportedAwsRegions = ["ap-northeast-1", "us-east-1"] as const;
 
@@ -17,6 +21,8 @@ export type BlogEnvironment = (typeof blogEnvironments)[number];
 export interface BlogConfiguration {
 	readonly sandbox: AwsEnvironment;
 	readonly production: AwsEnvironment;
+	readonly blogDomainName: string;
+	readonly sandboxBlogDomainName: string;
 	readonly sandboxSubdomainNameServers?: readonly string[] | undefined;
 }
 
@@ -54,6 +60,10 @@ export function loadBlogConfiguration(): BlogConfiguration {
 			? undefined
 			: parseNameServers(sandboxSubdomainNameServersValue);
 
+	const blogDomainName = parseBlogDomainName(
+		readRequiredEnvironmentVariable("BLOG_DOMAIN_NAME"),
+	);
+
 	return {
 		sandbox: {
 			account: parseAwsAccountId(
@@ -67,6 +77,8 @@ export function loadBlogConfiguration(): BlogConfiguration {
 			),
 			region,
 		},
+		blogDomainName,
+		sandboxBlogDomainName: sandboxDomainNameOf(blogDomainName),
 		sandboxSubdomainNameServers,
 	} satisfies BlogConfiguration;
 }

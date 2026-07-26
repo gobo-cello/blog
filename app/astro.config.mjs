@@ -5,7 +5,7 @@ import { defineConfig } from "astro/config";
 
 // https://astro.build/config
 export default defineConfig({
-	site: "https://blog.gobo-cello.com",
+	site: `https://${process.env.BLOG_DOMAIN_NAME ?? "blog.example.com"}`,
 	integrations: [sitemap()],
 	vite: {
 		plugins: [tailwindcss()],
