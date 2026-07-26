@@ -1,5 +1,31 @@
 import { describe, expect, it, test } from "vitest";
-import { InvalidNameServersError, parseNameServers } from "../lib/config/dns";
+import {
+	parseBlogDomainName,
+	parseNameServers,
+	sandboxDomainNameOf,
+} from "../lib/config/dns";
+
+describe("parseBlogDomainName", () => {
+	describe("空でない文字列が与えられた場合", () => {
+		it("そのまま受け入れる", () => {
+			expect(parseBlogDomainName("blog.example.com")).toBe("blog.example.com");
+		});
+	});
+
+	describe("空でない文字列以外が与えられた場合", () => {
+		test.each([undefined, null, ""])("エラーを投げる: %p", (value: unknown) => {
+			expect(() => parseBlogDomainName(value)).toThrow();
+		});
+	});
+});
+
+describe("sandboxDomainNameOf", () => {
+	it("sandboxサブドメインを前置したドメイン名を返す", () => {
+		expect(sandboxDomainNameOf("blog.example.com")).toBe(
+			"sandbox.blog.example.com",
+		);
+	});
+});
 
 describe("parseNameServers", () => {
 	describe("カンマ区切りの文字列が与えられた場合", () => {
@@ -18,9 +44,9 @@ describe("parseNameServers", () => {
 
 	describe("空要素を含む値が与えられた場合", () => {
 		test.each(["", "ns-1.awsdns-00.com,", ",ns-1.awsdns-00.com"])(
-			"InvalidNameServersErrorを投げる: %p",
+			"エラーを投げる: %p",
 			(value: string) => {
-				expect(() => parseNameServers(value)).toThrow(InvalidNameServersError);
+				expect(() => parseNameServers(value)).toThrow();
 			},
 		);
 	});

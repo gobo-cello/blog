@@ -1,5 +1,4 @@
-/** @internal テストの toThrow アサーションのためだけに export しており、production コードからは参照されない */
-export class InvalidBlogDomainNameError extends Error {
+class InvalidBlogDomainNameError extends Error {
 	public constructor(value: unknown) {
 		super(`Invalid blog domain name: ${String(value)}`);
 		this.name = "InvalidBlogDomainNameError";
@@ -18,8 +17,7 @@ export function sandboxDomainNameOf(blogDomainName: string): string {
 	return `sandbox.${blogDomainName}`;
 }
 
-/** @internal テストの toThrow アサーションのためだけに export しており、production コードからは参照されない */
-export class InvalidNameServersError extends Error {
+class InvalidNameServersError extends Error {
 	public constructor(value: unknown) {
 		super(`Invalid name servers: ${String(value)}`);
 		this.name = "InvalidNameServersError";
