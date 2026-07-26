@@ -7,7 +7,7 @@
 
 [ADR 0004](./0004-blog-implementation-approach.md)は、ブログを静的サイト(S3+CloudFront)としてAstroで実装する方針を決めていたが、実際の配信インフラ(S3・CloudFrontなど)の設計はロードマップG・Hで行うとしていた。今回、ロードマップG-2として、Sandbox環境向けにこれを実装する。
 
-`SandboxDnsStack`(ADR 0005)が持つ`sandbox.blog.gobo-cello.com`のhosted zoneとACM証明書を、実際にCloudFrontディストリビューションから参照する段階にあたる。
+`SandboxDnsStack`(ADR 0005)が持つ`sandbox.blog.example.com`のhosted zoneとACM証明書を、実際にCloudFrontディストリビューションから参照する段階にあたる。
 
 ## Decision
 

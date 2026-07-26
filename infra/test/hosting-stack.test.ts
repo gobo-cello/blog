@@ -24,14 +24,14 @@ interface EnvironmentShape {
 const environmentShapes: readonly EnvironmentShape[] = [
 	{
 		deploymentEnvironment: "sandbox",
-		domainName: "sandbox.blog.gobo-cello.com",
+		domainName: "sandbox.blog.example.com",
 		removalPolicy: RemovalPolicy.DESTROY,
 		autoDeleteObjects: true,
 		noIndex: true,
 	},
 	{
 		deploymentEnvironment: "production",
-		domainName: "blog.gobo-cello.com",
+		domainName: "blog.example.com",
 		removalPolicy: RemovalPolicy.RETAIN,
 		autoDeleteObjects: false,
 		noIndex: false,
