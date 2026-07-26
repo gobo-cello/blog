@@ -28,32 +28,36 @@ describe("findUnusedImages", () => {
 		}
 	}
 
-	it("記事から参照されている画像は検出しない", () => {
-		createPost(
-			"hello-world",
-			'---\ncover: "./cover.png"\n---\n\n![alt](./inline.png)\n',
-			["cover.png", "inline.png"],
-		);
+	describe("記事ディレクトリにindex.mdが存在する場合", () => {
+		it("記事から参照されている画像のパスは返さない", () => {
+			createPost(
+				"hello-world",
+				'---\ncover: "./cover.png"\n---\n\n![alt](./inline.png)\n',
+				["cover.png", "inline.png"],
+			);
 
-		expect(findUnusedImages(blogContentDir)).toEqual([]);
+			expect(findUnusedImages(blogContentDir)).toEqual([]);
+		});
+
+		it("記事から参照されていない画像のパスを返す", () => {
+			createPost("hello-world", "---\ntitle: hello\n---\n\n本文\n", [
+				"unused.png",
+			]);
+
+			const unusedImagePaths = findUnusedImages(blogContentDir);
+
+			expect(unusedImagePaths).toHaveLength(1);
+			expect(unusedImagePaths[0]).toContain("unused.png");
+		});
 	});
 
-	it("記事から参照されていない画像を検出する", () => {
-		createPost("hello-world", "---\ntitle: hello\n---\n\n本文\n", [
-			"unused.png",
-		]);
+	describe("記事ディレクトリにindex.mdが存在しない場合", () => {
+		it("ディレクトリ内の画像パスは返さない", () => {
+			const dir = join(blogContentDir, "not-a-post");
+			mkdirSync(dir);
+			writeFileSync(join(dir, "stray.png"), "");
 
-		const unusedImagePaths = findUnusedImages(blogContentDir);
-
-		expect(unusedImagePaths).toHaveLength(1);
-		expect(unusedImagePaths[0]).toContain("unused.png");
-	});
-
-	it("index.mdを持たないディレクトリは無視する", () => {
-		const dir = join(blogContentDir, "not-a-post");
-		mkdirSync(dir);
-		writeFileSync(join(dir, "stray.png"), "");
-
-		expect(findUnusedImages(blogContentDir)).toEqual([]);
+			expect(findUnusedImages(blogContentDir)).toEqual([]);
+		});
 	});
 });

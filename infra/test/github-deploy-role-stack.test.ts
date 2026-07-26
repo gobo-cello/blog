@@ -1,6 +1,6 @@
 import { Match, Template } from "aws-cdk-lib/assertions";
 import { App } from "aws-cdk-lib/core";
-import { describe, expect, test } from "vitest";
+import { describe, expect, it } from "vitest";
 import { parseAwsAccountId } from "../lib/config/accounts";
 import type { BlogEnvironment } from "../lib/config/environments";
 import { GithubDeployRoleStack } from "../lib/stacks/github-deploy-role-stack";
@@ -30,7 +30,7 @@ describe.each<BlogEnvironment>(["sandbox", "production"])(
 	(deploymentEnvironment) => {
 		const { stack, template } = synthesize(deploymentEnvironment);
 
-		test("GitHub Actions用のOIDC providerを1つ作成する", () => {
+		it("GitHub Actions用のOIDC providerを1つ作成する", () => {
 			template.resourceCountIs("AWS::IAM::OIDCProvider", 1);
 			template.hasResourceProperties("AWS::IAM::OIDCProvider", {
 				Url: "https://token.actions.githubusercontent.com",
@@ -38,7 +38,7 @@ describe.each<BlogEnvironment>(["sandbox", "production"])(
 			});
 		});
 
-		test(`sub claimを${deploymentEnvironment}環境に限定したtrust policyを作成する`, () => {
+		it(`sub claimを${deploymentEnvironment}環境に限定したtrust policyを作成する`, () => {
 			template.hasResourceProperties("AWS::IAM::Role", {
 				AssumeRolePolicyDocument: Match.objectLike({
 					Statement: Match.arrayWith([
@@ -60,7 +60,7 @@ describe.each<BlogEnvironment>(["sandbox", "production"])(
 			});
 		});
 
-		test("CDK bootstrapの3つのroleへのAssumeRoleだけを許可する", () => {
+		it("CDK bootstrapの3つのroleへのAssumeRoleだけを許可する", () => {
 			template.hasResourceProperties("AWS::IAM::Policy", {
 				PolicyDocument: Match.objectLike({
 					Statement: Match.arrayWith([
@@ -78,13 +78,13 @@ describe.each<BlogEnvironment>(["sandbox", "production"])(
 			});
 		});
 
-		test("Stack termination protectionを有効にする", () => {
+		it("Stack termination protectionを有効にする", () => {
 			expect(stack.terminationProtection).toBe(true);
 		});
 	},
 );
 
-test("additionalRegionsを指定した場合はそのregionのCDK bootstrapロールへのAssumeRoleも許可する", () => {
+it("additionalRegionsを指定した場合はそのregionのCDK bootstrapロールへのAssumeRoleも許可する", () => {
 	const app = new App();
 	const awsEnvironment = {
 		account: parseAwsAccountId("111111111111"),
@@ -119,7 +119,7 @@ test("additionalRegionsを指定した場合はそのregionのCDK bootstrapロ�
 	});
 });
 
-test("sandboxとproductionで異なるsub claimを生成する", () => {
+it("sandboxとproductionで異なるsub claimを生成する", () => {
 	const { template: sandboxTemplate } = synthesize("sandbox");
 	const { template: productionTemplate } = synthesize("production");
 
