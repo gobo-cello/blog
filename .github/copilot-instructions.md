@@ -100,6 +100,14 @@
 - 同一のテストスイート内で、意図なく`it`と`test`を混在させないこと。
 - Playwright (@playwright/test) を使うe2eテストは、フレームワークが`it`を提供しないため`test`を使用する
 
+## 環境変数を追加・変更する際に確認するファイル
+
+- `infra/lib/config/environments.ts`・`infra/lib/config/dns.ts`など: 環境変数のparse処理
+- `infra/.env.example`: ローカル開発用の一覧
+- `.github/workflows/deploy.yml`: 各`cdk deploy`ステップのenv
+- `.github/workflows/pr-ci-gate.yml`: `cdk-synth`・`cdk-diff`ジョブのenv
+- `app/astro.config.mjs`・`app/src/pages/rss.xml.ts`: appのbuildにも影響する値の場合
+
 ## GitHub Actions のバージョン固定
 
 - ワークフロー(`.github/workflows/*.yml`)で使用するGitHub Actionsは、可変なタグ(`@v4`など)ではなく、固定されたコミットハッシュで指定すること。
