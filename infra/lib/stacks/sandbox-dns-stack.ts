@@ -5,25 +5,32 @@ import {
 } from "aws-cdk-lib/aws-certificatemanager";
 import { HostedZone } from "aws-cdk-lib/aws-route53";
 import type { Construct } from "constructs";
-import { sandboxBlogDomainName } from "../config/dns";
 import { applyPlatformTags, createPlatformTags } from "../config/tags";
+
+export interface SandboxDnsStackProps extends StackProps {
+	readonly domainName: string;
+}
 
 export class SandboxDnsStack extends Stack {
 	public readonly hostedZone: HostedZone;
 	public readonly certificate: Certificate;
 
-	public constructor(scope: Construct, id: string, props: StackProps) {
+	public constructor(
+		scope: Construct,
+		id: string,
+		props: SandboxDnsStackProps,
+	) {
 		super(scope, id, {
 			...props,
 			terminationProtection: true,
 		});
 
 		this.hostedZone = new HostedZone(this, "SandboxBlogHostedZone", {
-			zoneName: sandboxBlogDomainName,
+			zoneName: props.domainName,
 		});
 
 		this.certificate = new Certificate(this, "SandboxBlogCertificate", {
-			domainName: sandboxBlogDomainName,
+			domainName: props.domainName,
 			validation: CertificateValidation.fromDns(this.hostedZone),
 		});
 

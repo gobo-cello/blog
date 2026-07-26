@@ -1,8 +1,5 @@
 import { describe, expect, it, test } from "vitest";
-import {
-	InvalidAwsAccountIdError,
-	parseAwsAccountId,
-} from "../lib/config/accounts";
+import { parseAwsAccountId } from "../lib/config/accounts";
 
 describe("parseAwsAccountId", () => {
 	describe("12桁のAWS account IDが与えられた場合", () => {
@@ -13,11 +10,9 @@ describe("parseAwsAccountId", () => {
 
 	describe("不正な値が与えられた場合", () => {
 		test.each([undefined, null, "", "123", "12345678901a", 123456789012])(
-			"InvalidAwsAccountIdErrorを投げる: %p",
+			"エラーを投げる: %p",
 			(value: unknown) => {
-				expect(() => parseAwsAccountId(value)).toThrow(
-					InvalidAwsAccountIdError,
-				);
+				expect(() => parseAwsAccountId(value)).toThrow();
 			},
 		);
 	});

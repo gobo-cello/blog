@@ -133,6 +133,7 @@ jobs:
         env:
           AWS_BLOG_SANDBOX_ACCOUNT_ID: '111111111111'
           AWS_BLOG_PRODUCTION_ACCOUNT_ID: '222222222222'
+          BLOG_DOMAIN_NAME: blog.example.com
 
   cdk-diff:
     runs-on: ubuntu-slim
@@ -160,6 +161,7 @@ jobs:
         env:
           AWS_BLOG_SANDBOX_ACCOUNT_ID: ${{ vars.AWS_BLOG_SANDBOX_ACCOUNT_ID }}
           AWS_BLOG_PRODUCTION_ACCOUNT_ID: ${{ vars.AWS_BLOG_PRODUCTION_ACCOUNT_ID }}
+          BLOG_DOMAIN_NAME: ${{ vars.BLOG_DOMAIN_NAME }}
 
   pr-ci-gate:
     needs:

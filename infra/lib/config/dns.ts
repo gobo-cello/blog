@@ -1,9 +1,23 @@
-export const blogDomainName = "blog.gobo-cello.com" as const;
+class InvalidBlogDomainNameError extends Error {
+	public constructor(value: unknown) {
+		super(`Invalid blog domain name: ${String(value)}`);
+		this.name = "InvalidBlogDomainNameError";
+	}
+}
 
-export const sandboxBlogDomainName = "sandbox.blog.gobo-cello.com" as const;
+export function parseBlogDomainName(value: unknown): string {
+	if (typeof value !== "string" || value.length === 0) {
+		throw new InvalidBlogDomainNameError(value);
+	}
 
-/** @internal テストの toThrow アサーションのためだけに export しており、production コードからは参照されない */
-export class InvalidNameServersError extends Error {
+	return value;
+}
+
+export function sandboxDomainNameOf(blogDomainName: string): string {
+	return `sandbox.${blogDomainName}`;
+}
+
+class InvalidNameServersError extends Error {
 	public constructor(value: unknown) {
 		super(`Invalid name servers: ${String(value)}`);
 		this.name = "InvalidNameServersError";

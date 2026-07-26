@@ -8,23 +8,24 @@ describe("SandboxDnsStack", () => {
 	const app = new App();
 	const stack = new SandboxDnsStack(app, "TestSandboxDnsStack", {
 		env: { account: parseAwsAccountId("111111111111"), region: "us-east-1" },
+		domainName: "sandbox.blog.example.com",
 	});
 	const template = Template.fromStack(stack);
 
-	it("sandbox.blog.gobo-cello.com用のhosted zoneを作成する", () => {
+	it("指定したdomainName用のhosted zoneを作成する", () => {
 		template.resourceCountIs("AWS::Route53::HostedZone", 1);
 		template.hasResourceProperties("AWS::Route53::HostedZone", {
-			Name: "sandbox.blog.gobo-cello.com.",
+			Name: "sandbox.blog.example.com.",
 		});
 	});
 
 	it("hosted zoneでDNS検証するACM証明書を作成する", () => {
 		template.hasResourceProperties("AWS::CertificateManager::Certificate", {
-			DomainName: "sandbox.blog.gobo-cello.com",
+			DomainName: "sandbox.blog.example.com",
 			ValidationMethod: "DNS",
 			DomainValidationOptions: Match.arrayWith([
 				Match.objectLike({
-					DomainName: "sandbox.blog.gobo-cello.com",
+					DomainName: "sandbox.blog.example.com",
 					HostedZoneId: Match.objectLike({
 						Ref: Match.stringLikeRegexp("SandboxBlogHostedZone"),
 					}),

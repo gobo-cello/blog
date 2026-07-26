@@ -7,7 +7,7 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
 );
 ---
 
-<BaseLayout title="gobo-cello.com" description="gobo-cello.comのブログです。">
+<BaseLayout title="ごぼうのブログ" description="ごぼうのブログです。">
 	<ul class="list-none divide-y divide-border p-0">
 		{
 			posts.map((post) => (
