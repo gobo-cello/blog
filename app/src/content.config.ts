@@ -3,7 +3,7 @@ import { glob } from "astro/loaders";
 import { z } from "zod";
 
 const CATEGORIES = ["agile", "tech", "meta"];
-const TAGS = ["AWS"] as const;
+const TAGS = ["AWS", "fukabori.fm", "yurucom"] as const;
 
 const posts = defineCollection({
 	loader: glob({ pattern: "**/index.md", base: "./src/content/posts" }),
