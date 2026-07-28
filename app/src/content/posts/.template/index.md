@@ -6,3 +6,5 @@ tags: []
 # cover: "./cover.png"
 draft: true
 ---
+
+template
