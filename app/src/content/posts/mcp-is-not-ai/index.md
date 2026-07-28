@@ -2,7 +2,6 @@
 title: MCP は AI ではない
 date: 2026-07-28
 category: tech
-tags: []
 ---
 
 MCP は AI ではない。
