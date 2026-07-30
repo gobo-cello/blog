@@ -12,25 +12,25 @@ pre-push:
   parallel: true
   commands:
     build:
-      glob: "infra/**"
+      glob: "infra/**/*"
       run: npm run --prefix infra build
     jest:
-      glob: "infra/**"
+      glob: "infra/**/*"
       run: npm --prefix infra test
     cdk-synth:
-      glob: "infra/**"
+      glob: "infra/**/*"
       run: npm run --prefix infra cdk synth
     app-build:
-      glob: "app/**"
+      glob: "app/**/*"
       run: npm run --prefix app build
     app-test:
-      glob: "app/**"
+      glob: "app/**/*"
       run: npm --prefix app test
     app-check-images:
-      glob: "app/**"
+      glob: "app/**/*"
       run: npm run --prefix app check:images
     e2e-check-types:
-      glob: "e2e/**"
+      glob: "e2e/**/*"
       run: npm run --prefix e2e check:types
     knip:
       run: npm run knip
