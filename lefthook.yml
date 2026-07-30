@@ -1,3 +1,5 @@
+glob_matcher: doublestar
+
 pre-commit:
   parallel: true
   commands:
@@ -10,26 +12,26 @@ pre-push:
   parallel: true
   commands:
     build:
-      root: "infra/"
-      run: npm run build
+      glob: "infra/**"
+      run: npm run --prefix infra build
     jest:
-      root: "infra/"
-      run: npm test
+      glob: "infra/**"
+      run: npm --prefix infra test
     cdk-synth:
-      root: "infra/"
-      run: npx cdk synth
+      glob: "infra/**"
+      run: npm run --prefix infra cdk synth
     app-build:
-      root: "app/"
-      run: npm run build
+      glob: "app/**"
+      run: npm run --prefix app build
     app-test:
-      root: "app/"
-      run: npm test
+      glob: "app/**"
+      run: npm --prefix app test
     app-check-images:
-      root: "app/"
-      run: npm run check:images
+      glob: "app/**"
+      run: npm run --prefix app check:images
     e2e-check-types:
-      root: "e2e/"
-      run: npm run check:types
+      glob: "e2e/**"
+      run: npm run --prefix e2e check:types
     knip:
       run: npm run knip
     knip-production:
