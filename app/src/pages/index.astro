@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { renderTitleHtml } from "../lib/title";
 
 const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
 	(a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
@@ -15,9 +16,8 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
 					<a
 						href={`/posts/${post.id}/`}
 						class="text-lg font-semibold text-foreground no-underline hover:text-accent"
-					>
-						{post.data.title}
-					</a>
+						set:html={renderTitleHtml(post.data.title)}
+					/>
 				</li>
 			))
 		}

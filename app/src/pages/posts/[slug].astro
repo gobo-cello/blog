@@ -2,6 +2,7 @@
 import { Image } from "astro:assets";
 import { getCollection, render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { renderTitleHtml } from "../../lib/title";
 
 export async function getStaticPaths() {
 	const posts = await getCollection("posts", ({ data }) => !data.draft);
@@ -17,7 +18,7 @@ const { Content } = await render(post);
 
 <BaseLayout title={post.data.title}>
 	<article>
-		<h1 class="text-3xl font-bold">{post.data.title}</h1>
+		<h1 class="text-3xl font-bold" set:html={renderTitleHtml(post.data.title)} />
 		<div class="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted">
 			<p>{post.data.date.toISOString().slice(0, 10)}</p>
 			<span aria-hidden="true">·</span>
