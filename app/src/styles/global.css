@@ -19,6 +19,16 @@
 		background-color: var(--color-background);
 		color: var(--color-foreground);
 	}
+
+	/*
+	 * .prose 外(記事タイトルなど)の code 要素にも、本文のインラインコードと
+	 * 同じ配色・太さを適用する。.prose 内は components レイヤーの
+	 * --tw-prose-code / font-weight が優先されるため上書きされない。
+	 */
+	code {
+		color: var(--color-accent);
+		font-weight: 600;
+	}
 }
 
 /*
@@ -43,4 +53,13 @@
 	--tw-prose-pre-bg: var(--color-foreground);
 	--tw-prose-th-borders: var(--color-border);
 	--tw-prose-td-borders: var(--color-border);
+}
+
+/*
+ * @tailwindcss/typography はインラインコードの前後に "`" を疑似要素で
+ * 装飾として追加するが、記事本文では不要なため無効化する。
+ */
+.prose code::before,
+.prose code::after {
+	content: none;
 }

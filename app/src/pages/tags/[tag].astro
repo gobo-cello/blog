@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { renderTitleHtml } from "../../lib/title";
 
 export async function getStaticPaths() {
 	const posts = await getCollection("posts", ({ data }) => !data.draft);
@@ -26,9 +27,8 @@ const { posts } = Astro.props;
 					<a
 						href={`/posts/${post.id}/`}
 						class="text-foreground no-underline hover:text-accent"
-					>
-						{post.data.title}
-					</a>
+						set:html={renderTitleHtml(post.data.title)}
+					/>
 				</li>
 			))
 		}
