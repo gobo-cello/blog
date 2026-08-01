@@ -63,3 +63,17 @@
 .prose code::after {
 	content: none;
 }
+
+/*
+ * @tailwindcss/typography は blockquote を斜体にし、先頭・末尾の p 要素に
+ * 引用符(open-quote/close-quote)を疑似要素で追加するが、記事本文では
+ * 不要なため無効化する。
+ */
+.prose blockquote {
+	font-style: normal;
+}
+
+.prose blockquote p:first-of-type::before,
+.prose blockquote p:last-of-type::after {
+	content: none;
+}
