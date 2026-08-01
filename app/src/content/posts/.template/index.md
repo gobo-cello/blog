@@ -1,7 +1,7 @@
 ---
 title: ""
 date: 2026-01-01
-category: ""
+category: "meta"
 tags: []
 # cover: "./cover.png"
 draft: true
