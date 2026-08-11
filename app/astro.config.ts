@@ -37,7 +37,7 @@ export default defineConfig({
 	site: resolveSiteUrl(process.env.BLOG_DOMAIN_NAME),
 	integrations: [
 		expressiveCode({
-			themes: ["github-light"],
+			themes: ["github-dark"],
 			plugins: [autoLanguageTitlePlugin()],
 		}),
 		mermaid({
