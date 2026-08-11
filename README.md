@@ -108,7 +108,7 @@ blog/
 │   │   ├── layouts/
 │   │   └── pages/
 │   ├── scripts/            # 記事から参照されていない画像を検出するCIチェックスクリプトなど
-│   ├── astro.config.mjs
+│   ├── astro.config.ts
 │   ├── package.json
 │   └── tsconfig.json
 ├── e2e/                   # デプロイ後のsandbox環境向けE2Eスモークテスト(独立npm project)
@@ -208,6 +208,8 @@ npx cdk synth
 cd app
 npm ci
 ```
+
+`app/.env.local`(gitignore対象、`.env.example`を元に作成)に`BLOG_DOMAIN_NAME`を設定します。`.env.local`は`astro.config.ts`が自動読み込みするため、`npm run dev`・`npm run build`実行前に手動でsourceする必要はありません。
 
 ローカル開発サーバーを起動します。
 

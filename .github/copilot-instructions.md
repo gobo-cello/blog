@@ -106,7 +106,7 @@
 - `infra/.env.example`: ローカル開発用の一覧
 - `.github/workflows/deploy.yml`: 全ての`cdk deploy`ステップのenv。`bin/infra.ts`はターゲットのstackに関わらず全stackを構築するため、「このstackはこの環境変数を使わないから不要」という判断はできない
 - `.github/workflows/pr-ci-gate.yml`: `cdk-synth`・`cdk-diff`ジョブのenv
-- `app/astro.config.mjs`・`app/src/pages/rss.xml.ts`: appのbuildにも影響する値の場合
+- `app/astro.config.ts`・`app/src/pages/rss.xml.ts`: appのbuildにも影響する値の場合
 
 ## GitHub Actions のバージョン固定
 
