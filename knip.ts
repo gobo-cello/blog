@@ -8,6 +8,7 @@ const config: KnipConfig = {
 			project: [
 				"**/*.{js,mjs,cjs,jsx,ts,tsx,mts,cts,astro,css}!",
 				"!scripts/check-unused-images.ts!",
+				"!src/lib/code-block-title.ts!",
 			],
 			ignoreDependencies: [
 				"@astrojs/sitemap!",
@@ -15,6 +16,9 @@ const config: KnipConfig = {
 				"zod!",
 				"astro-mermaid!",
 				"mermaid!",
+				"@expressive-code/core!",
+				"astro-expressive-code!",
+				"vite!",
 			],
 		},
 		infra: {
