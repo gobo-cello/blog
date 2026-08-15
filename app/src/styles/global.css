@@ -31,7 +31,15 @@
 	 */
 	code {
 		color: var(--color-accent);
-		font-weight: 600;
+		font-weight: normal;
+		background-color: color-mix(
+			in srgb,
+			var(--color-border) 45%,
+			var(--color-background)
+		);
+		border-radius: 0.25rem;
+		padding-inline: 0.35em;
+		padding-block: 0.15em;
 	}
 
 	/*
@@ -57,7 +65,7 @@
 	--tw-prose-counters: var(--color-muted);
 	--tw-prose-bullets: var(--color-border);
 	--tw-prose-hr: var(--color-border);
-	--tw-prose-quotes: var(--color-foreground);
+	--tw-prose-quotes: var(--color-muted);
 	--tw-prose-quote-borders: var(--color-accent);
 	--tw-prose-captions: var(--color-muted);
 	--tw-prose-code: var(--color-accent);
@@ -65,6 +73,14 @@
 	--tw-prose-pre-bg: var(--color-foreground);
 	--tw-prose-th-borders: var(--color-border);
 	--tw-prose-td-borders: var(--color-border);
+}
+
+/*
+ * @tailwindcss/typography はインラインコードを font-weight: 600 にするが、
+ * 記事本文では背景色だけで区別したいため通常の太さに戻す。
+ */
+.prose code {
+	font-weight: normal;
 }
 
 /*
@@ -88,4 +104,14 @@
 .prose blockquote p:first-of-type::before,
 .prose blockquote p:last-of-type::after {
 	content: none;
+}
+
+/*
+ * @tailwindcss/typography は引用内のコードを引用文字色に合わせて
+ * color: inherit にするが、それだと引用の薄い文字色に埋もれてコードと
+ * 分かりにくい。かといって通常のコードと同じ accent 色では引用の
+ * 落ち着いたトーンから浮くため、accent と muted を混色した専用の色を使う。
+ */
+.prose blockquote code {
+	color: color-mix(in srgb, var(--color-accent) 50%, var(--color-muted));
 }
