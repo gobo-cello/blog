@@ -15,6 +15,10 @@
 }
 
 @layer base {
+	html {
+		scroll-behavior: smooth;
+	}
+
 	body {
 		background-color: var(--color-background);
 		color: var(--color-foreground);
@@ -28,6 +32,14 @@
 	code {
 		color: var(--color-accent);
 		font-weight: 600;
+	}
+
+	/*
+	 * 目次クリックやURLフラグメントでの見出しジャンプ時、見出しがビューポート
+	 * 最上端にぴったり接してしまうと窮屈なため、上に余白を残す。
+	 */
+	.prose :is(h2, h3, h4) {
+		scroll-margin-top: 6rem;
 	}
 }
 
