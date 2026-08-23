@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { sortPostsByDateDesc } from "../../lib/sort";
 import { renderTitleHtml } from "../../lib/title";
 
 export async function getStaticPaths() {
@@ -9,7 +10,9 @@ export async function getStaticPaths() {
 	return tags.map((tag) => ({
 		params: { tag },
 		props: {
-			posts: posts.filter((post) => post.data.tags.includes(tag)),
+			posts: sortPostsByDateDesc(
+				posts.filter((post) => post.data.tags.includes(tag)),
+			),
 		},
 	}));
 }

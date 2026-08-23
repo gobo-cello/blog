@@ -2,7 +2,8 @@ import { defineCollection } from "astro:content";
 import { glob } from "astro/loaders";
 import { z } from "zod";
 
-const CATEGORIES = ["agile", "tech", "meta"];
+export const CATEGORIES = ["agile", "tech", "meta"] as const;
+export type Category = (typeof CATEGORIES)[number];
 const TAGS = ["AWS", "React"] as const;
 
 const posts = defineCollection({
