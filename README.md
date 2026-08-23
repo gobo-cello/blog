@@ -122,10 +122,8 @@ blog/
 ├── .github/
 │   ├── actions/
 │   ├── workflows/
-│   ├── copilot-instructions.md
 │   └── dependabot.yml
-├── .claude/
-│   └── CLAUDE.md
+├── CLAUDE.md
 ├── .gitignore
 ├── .node-version
 ├── .npmrc
