@@ -1,6 +1,6 @@
 ---
 title: "使われなくなったコードを、Knip で検出する"
-date: 2026-08-11
+date: 2026-08-17
 category: "tech"
 ---
 
