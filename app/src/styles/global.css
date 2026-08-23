@@ -8,6 +8,14 @@
 	--color-border: #ddd8cf;
 	--color-accent: #a24e2c;
 
+	/*
+	 * カテゴリ識別用の配色。3色とも OKLCH の色差(CVD シミュレーション込み)を
+	 * 検証済みで、隣接色との判別しやすさを確保している。
+	 */
+	--color-category-agile: #009e73;
+	--color-category-tech: #0072b2;
+	--color-category-meta: #d55e00;
+
 	--font-sans:
 		-apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN",
 		"Hiragino Sans", "Yu Gothic Medium", "Yu Gothic", "Meiryo", "Segoe UI",
