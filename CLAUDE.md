@@ -18,8 +18,35 @@
 - 連絡先メールアドレス
 - ドメインレジストラの認証情報
 - シークレットおよびAPIキー
+- apex hosted zone(`aws-platform`リポジトリが所有)。ブログ用サブドメインの hosted zone はこのリポジトリで作成し、apex からの NS 委譲で連携する(詳細は`docs/adr/0003-dns-and-certificate.md`)
 
-組織レベルの共通基盤は、別のInfrastructure as Codeリポジトリで管理する。このリポジトリは、そのリポジトリが提供するアカウント構成やログ基盤を前提として、ブログ固有のワークロードだけを扱う。
+組織レベルの共通基盤は、別の`aws-platform`リポジトリで管理する。このリポジトリは、そのリポジトリが提供するアカウント構成やログ基盤を前提として、ブログ固有のワークロードだけを扱う。
+
+## ディレクトリ構成と主要コマンド
+
+各ディレクトリは独立した`package.json`を持つ。ルートには Biome / Knip / lefthook の設定だけがある。
+
+- `app/`: ブログ本体。`npm --prefix app run dev` / `run build` / `test` / `run check:types` / `run check:images`
+- `infra/`: ワークロード用の CDK。`npm --prefix infra run build` / `test` / `run cdk synth` / `run cdk diff <stack...>`。エントリポイントは`infra/bin/infra.ts`で、ターゲット指定に関わらず全 stack を構築する
+- `e2e/`: sandbox 環境に対する Playwright スモークテスト。`npm --prefix e2e test` / `run check:types`
+- `docs/`: ドキュメント。ADR は`docs/adr/`
+- `scripts/`: 補助スクリプト(`actionlint.sh`など)
+- ルート: `npm run check`(Biome、safe fix のみ) / `npm run knip` / `npm run knip:production`
+
+## デプロイ
+
+- デプロイは GitHub Actions(`.github/workflows/deploy.yml`)経由のみで行う。ローカルや手動での`cdk deploy`は行わない。
+- `main`への push で`app/**`・`infra/**`・`e2e/**`などが変更されると起動し、`sandbox` → e2e スモーク → `production`の順に GitHub Environments へデプロイする。
+- 各 Environment での AWS 認証は OIDC によるロール引き受けで行う。
+
+## 品質確認と完了前チェック
+
+- コードを変更したら、対象スタックの formatter / linter を実行すること。
+  - JavaScript / TypeScript / JSON: ルートの Biome。`npm run check`(safe fix のみ)。`--unsafe`は自動では使わず、必要なときだけ手動で`npm run check:unsafe`を実行し、diff を確認すること。
+  - GitHub Actions ワークフロー: `./scripts/actionlint.sh -color`
+- 変更が`lefthook.yml`の`pre-push`対象(`infra`/`app`/`e2e`の build・test、`cdk synth`、`knip`、`knip:production`、`actionlint`)に該当する場合は、作業完了前に該当チェックを実行し、通してから完了とすること。失敗した場合は原因を修正し、同じチェックを再実行すること。
+- Knip は green にすることを目的にせず、「Knip 設定の方針」節と根本原因修正の手順に従うこと。通常モードと`--production --strict`の両方を確認すること。
+- PR の CI(`.github/workflows/pr-ci-gate.yml`)は上記と同じチェックを実行する。ローカルで通してから push すること。
 
 ## コードのドメイン非依存の原則
 
