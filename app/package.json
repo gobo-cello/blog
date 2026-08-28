@@ -2,8 +2,10 @@
 	"name": "app",
 	"type": "module",
 	"version": "0.0.1",
+	"packageManager": "npm@12.0.2",
 	"engines": {
-		"node": ">=22.12.0"
+		"node": "^24.0.0",
+		"npm": "^12.0.0"
 	},
 	"scripts": {
 		"dev": "astro dev",
@@ -33,5 +35,8 @@
 		"tsx": "^4.23.8",
 		"typescript": "^6.0.3",
 		"vitest": "^4.1.10"
+	},
+	"allowScripts": {
+		"esbuild": true
 	}
 }
