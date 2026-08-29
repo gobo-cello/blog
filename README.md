@@ -17,8 +17,6 @@ AWS Organizations全体の共通基盤(監査ログの一元管理、Service Con
 - GitHub ActionsとAWSのOIDC連携
 - GitHub Actions用のIAM role
 
-実装されていない項目については、今後このリポジトリへ段階的に追加します。
-
 ## 管理対象外
 
 次の情報およびリソースは、このリポジトリでは管理しません。
@@ -103,10 +101,14 @@ blog/
 │   └── README.md
 ├── app/                   # Astro(静的サイト生成)によるブログ本体(独立npm project)
 │   ├── src/
-│   │   ├── content/blog/<slug>/  # 記事本体(Markdown)と、記事ごとにcolocationされた画像
-│   │   ├── content.config.ts      # content collectionのschema定義(Zod)
+│   │   ├── content/posts/<slug>/index.md  # 記事本体(Markdown)。1記事1ディレクトリ
+│   │   ├── content.config.ts               # content collectionのschema定義(Zod)
+│   │   ├── assets/images/  # 記事やレイアウトから参照する画像
+│   │   ├── components/     # Astroコンポーネント
 │   │   ├── layouts/
-│   │   └── pages/
+│   │   ├── lib/            # URL生成・ソート・カテゴリ分類などのヘルパー
+│   │   ├── pages/          # ルーティング(一覧・記事・カテゴリ・タグ・RSS)
+│   │   └── styles/
 │   ├── scripts/            # 記事から参照されていない画像を検出するCIチェックスクリプトなど
 │   ├── astro.config.ts
 │   ├── package.json
@@ -145,9 +147,11 @@ blog/
 
 `app/`はAstro(静的サイト生成)によるブログ本体のアプリケーションで、次の責務で分割しています。設計判断の詳細は[ADR 0004](./docs/adr/0004-blog-implementation-approach.md)を参照してください。
 
-- `app/src/content/`: 記事本体(Markdown)と、記事ごとにcolocationされた画像
+- `app/src/content/posts/`: 記事本体(Markdown)。`<slug>/index.md` の形式で1記事1ディレクトリ
 - `app/src/content.config.ts`: content collectionのschema定義(Zod)
-- `app/src/layouts/`・`app/src/pages/`: ページとレイアウト
+- `app/src/assets/images/`: 記事やレイアウトから参照する画像
+- `app/src/components/`・`app/src/layouts/`・`app/src/pages/`・`app/src/styles/`: UIコンポーネント、レイアウト、ルーティング、スタイル
+- `app/src/lib/`: URL生成、ソート、カテゴリ分類などのヘルパー
 - `app/scripts/`: 記事から参照されていない画像を検出するCIチェックスクリプトなど
 
 `e2e/`は、実際にデプロイされたsandbox環境に対するE2Eスモークテストです。設計判断の詳細は[ADR 0007](./docs/adr/0007-e2e-smoke-test.md)を参照してください。`deploy.yml`の`sandbox`→`e2e-test`→`production`のneeds chainで、sandboxデプロイ直後・production昇格前にのみ実行します。sandbox環境への到達性が前提のため、`pr-ci-gate.yml`では型チェックとテストファイルの構文健全性チェック(`playwright test --list`)のみ行います。
@@ -243,7 +247,7 @@ npm run check
 git hooksには[lefthook](https://github.com/evilmartians/lefthook)を使用します。`npm ci`実行時に`prepare`スクリプトが自動的に`lefthook install`を実行します。
 
 - pre-commit: 変更されたファイルへBiomeを適用します。
-- pre-push: `infra/`でbuild、テスト、`cdk synth`を実行します。`e2e/`は型チェックのみ実行します(実際のテスト実行はsandbox環境への到達性が前提のため)。
+- pre-push: 変更されたディレクトリに応じて `infra/`(build・テスト・`cdk synth`)、`app/`(build・テスト・未参照画像チェック)、`e2e/`(型チェックのみ。実テストはsandbox環境への到達性が前提のため)を実行し、あわせて Knip と actionlint を実行します。対象と内容は `lefthook.yml` を参照してください。
 - commit-msg: Conventional Commitsの形式を検証します。
 
 ## AWS CLIプロファイル
@@ -307,7 +311,7 @@ GitHub ActionsからAWSへは、OIDCによる一時認証だけを使用しま�
    - Environment `sandbox` Variables: `AWS_BLOG_SANDBOX_DEPLOY_ROLE_ARN`(手順3のSandbox側ARN)
    - Environment `production` Variables: `AWS_BLOG_PRODUCTION_DEPLOY_ROLE_ARN`(手順3のProduction側ARN)
 
-以降は、Pull Requestでの`cdk diff`、`main`へのmergeによる`deploy.yml`の自動実行(`sandbox` job)、その成功後の`production` jobの承認付き実行で運用します。
+以降は、`main`へのmergeで`deploy.yml`が`sandbox` job(GitHub Deploy Role・DNS・Hosting stack)→`e2e-test` job(sandboxに対するスモークテスト)→`production` job(承認付き)の順で自動実行されます。
 
 ## ドメインとDNS
 
@@ -337,7 +341,7 @@ CloudFrontで使用するACM証明書は`us-east-1`でしか発行できない�
 
 6. `dig blog.example.com NS`で委譲が反映されていること、`aws acm describe-certificate`等で証明書が`ISSUED`になっていることを確認します。
 
-7. 動作確認できたら、`deploy.yml`の`production` jobへ`ProductionDnsStack`を追加するコミットをmergeします(初回は手動deployで検証してからCIへ組み込みます)。
+7. 動作確認できたら通常運用に移行します。`deploy.yml`の`production` jobはすでに`ProductionDnsStack`・`ProductionHostingStack`を対象にしています。
 
 `sandbox.blog.example.com`は`blog.example.com`のhosted zoneからNS delegationを受けるため、上記1〜7の後に続けて次の手順を1回だけ手動セットアップします。
 
@@ -364,7 +368,7 @@ CloudFrontで使用するACM証明書は`us-east-1`でしか発行できない�
 
 11. `dig sandbox.blog.example.com NS`で委譲が反映されていること、`aws acm describe-certificate`等で証明書が`ISSUED`になっていることを確認します。
 
-12. 動作確認できたら、`deploy.yml`の`sandbox` jobへ`SandboxDnsStack`を追加するコミットをmergeします。
+12. 動作確認できたら通常運用に移行します。`deploy.yml`の`sandbox` jobはすでに`SandboxDnsStack`・`SandboxHostingStack`を対象にしています。
 
 ## Git運用
 
