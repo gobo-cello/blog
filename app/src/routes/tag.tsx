@@ -16,9 +16,7 @@ export function loader({ params }: Route.LoaderArgs) {
 	return {
 		tag,
 		posts: sortPostsByDateDesc(
-			posts.filter((post) =>
-				(post.data.tags as readonly string[]).includes(tag),
-			),
+			posts.filter((post) => post.data.tags.includes(tag)),
 		),
 	};
 }
