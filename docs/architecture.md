@@ -147,6 +147,8 @@ apex側の判断(ADR参照)と同じ理由により、このリポジトリ側�
 ```text
 app/
 ├── src/
+│   ├── config/
+│   │   └── site.ts            # 環境変数からのサイト設定(ドメイン / canonical URL)解決
 │   ├── content/
 │   │   ├── posts/
 │   │   │   └── <slug>/
@@ -154,7 +156,8 @@ app/
 │   │   │       └── *.jpg,png  # colocateされた画像
 │   │   ├── schema.ts          # frontmatterのschema定義(Zod)
 │   │   ├── posts.ts           # 記事の読み込み(Node fs、ビルド時のみ実行)
-│   │   └── feed.ts            # RSS / sitemap 生成(buildEndから実行)
+│   │   ├── route-paths.ts     # prerender / sitemap のパス一覧の単一の正
+│   │   └── feed.ts            # RSS / sitemap の XML ビルダー(resource routeから利用)
 │   ├── components/            # Reactコンポーネント
 │   ├── mdx/                   # MDXのrehypeプラグインと差し込みコンポーネント
 │   ├── routes/
@@ -162,7 +165,9 @@ app/
 │   │   ├── post.tsx
 │   │   ├── category.tsx
 │   │   ├── tag.tsx
-│   │   └── not-found.tsx
+│   │   ├── not-found.tsx
+│   │   ├── rss.xml.ts         # RSS を prerender する resource route
+│   │   └── sitemap.xml.ts     # sitemap を prerender する resource route
 │   ├── routes.ts
 │   └── root.tsx
 └── scripts/
@@ -171,15 +176,15 @@ app/
 
 記事は`src/content/posts/<slug>/index.mdx`に置き、`src/content/posts.ts`がNodeの`fs`で直接読み込む(`loader`はビルド時のprerenderでのみ実行される)。`index.mdx`を持つディレクトリ名がそのままURLのslugになる。MDX本文は`routes/post.tsx`が`import.meta.glob`で取得する。画像は記事ディレクトリにcolocationする。
 
-frontmatter schema: `title`・`date`・`category`(単一の主分類)・`tags`(複数可)・`draft`。
+frontmatter schema: `title`・`date`・`category`(単一の主分類、閉じた語彙)・`tags`(自由記述・複数可、記事が使ったものがそのまま語彙になる)・`draft`。
 
 ### URL設計
 
 - 記事: `/posts/<slug>/`
 - カテゴリ別アーカイブ: `/categories/<category>/`
 - タグ別アーカイブ: `/tags/<tag>/`
-- RSS: `/rss.xml`(`src/content/feed.ts`がbuildEndで生成)
-- サイトマップ: `/sitemap.xml`(同上、単一ファイル)
+- RSS: `/rss.xml`(`src/routes/rss.xml.ts` の resource route を prerender)
+- サイトマップ: `/sitemap.xml`(`src/routes/sitemap.xml.ts` の resource route を prerender、単一ファイル)
 
 ドメイン自体が`blog.example.com`であるため、`/blog/`のようなprefixは付けない。
 

@@ -10,8 +10,9 @@ import { z } from "zod";
  * 呼び出し時に行う。`react-router.config.ts` がこのモジュールを(`feed.ts` 経由で)
  * 静的 import しているため、トップレベルで解決すると `BLOG_DOMAIN_NAME` を渡さない
  * `app` の vitest 起動時や `react-router typegen` 実行時にまで例外が波及してしまう。
- * canonical URL の hard fail は、RSS / sitemap を実際に書き出す `writeFeedFiles`
- * が値を読むときに起きれば十分(従来の `lib/site-url.ts` も呼び出し時に投げていた)。
+ * canonical URL の hard fail は、RSS / sitemap の resource route loader
+ * (`routes/{rss,sitemap}.xml.ts`)が prerender 時に値を読むときに起きれば十分
+ * (従来の `lib/site-url.ts` も呼び出し時に投げていた)。
  */
 
 const siteConfigSchema = z.object({

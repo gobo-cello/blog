@@ -5,9 +5,9 @@ import { type Post, postFrontmatterSchema } from "./schema";
 
 /**
  * 記事ディレクトリの走査は Node の `fs` で行い、`import.meta.glob` は使わない。
- * このモジュールは `react-router.config.ts` の `prerender` / `buildEnd` からも
- * import されるが、その経路や Knip の設定読み込みは Vite 変換を経ないため、
- * `import.meta.glob` を書くと解決できずに壊れる。MDX 本文(React コンポーネント)は
+ * このモジュールは `react-router.config.ts` の `prerender()`(`route-paths.ts`
+ * 経由)や Knip の設定読み込みなど、Vite 変換を経ない経路からも import される
+ * ため、`import.meta.glob` を書くと解決できずに壊れる。MDX 本文(React コンポーネント)は
  * `routes/post.tsx` が `import.meta.glob` で取得し、ここでは frontmatter と slug だけ扱う。
  *
  * パスは `process.cwd()` 基準で解決する。ビルド後のこのモジュールは
