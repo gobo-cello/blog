@@ -15,18 +15,60 @@ describe("postFrontmatterSchema", () => {
 		expect(parsed.date.toISOString().slice(0, 10)).toBe("2026-08-17");
 	});
 
-	it("既知のカテゴリ・タグを受け入れる", () => {
+	it("既知のカテゴリと任意のタグ文字列を受け入れる", () => {
 		const parsed = postFrontmatterSchema.parse({
 			title: "タイトル",
 			date: "2026-08-17",
 			category: "meta",
-			tags: ["React"],
+			tags: ["Go", "設計"],
 			draft: true,
 		});
 
 		expect(parsed.category).toBe("meta");
-		expect(parsed.tags).toEqual(["React"]);
+		expect(parsed.tags).toEqual(["Go", "設計"]);
 		expect(parsed.draft).toBe(true);
+	});
+
+	it("タグは enum ではなく任意の非空文字列を語彙として受け入れる", () => {
+		const parsed = postFrontmatterSchema.parse({
+			title: "タイトル",
+			date: "2026-08-17",
+			category: "tech",
+			tags: ["まったく新しいタグ", "another-new-tag"],
+		});
+
+		expect(parsed.tags).toEqual(["まったく新しいタグ", "another-new-tag"]);
+	});
+
+	it("前後の空白を除去したうえでタグを保持する", () => {
+		const parsed = postFrontmatterSchema.parse({
+			title: "タイトル",
+			date: "2026-08-17",
+			category: "tech",
+			tags: ["  React  "],
+		});
+
+		expect(parsed.tags).toEqual(["React"]);
+	});
+
+	it("空文字・空白のみのタグを拒否する", () => {
+		expect(() =>
+			postFrontmatterSchema.parse({
+				title: "タイトル",
+				date: "2026-08-17",
+				category: "tech",
+				tags: [""],
+			}),
+		).toThrow();
+
+		expect(() =>
+			postFrontmatterSchema.parse({
+				title: "タイトル",
+				date: "2026-08-17",
+				category: "tech",
+				tags: ["   "],
+			}),
+		).toThrow();
 	});
 
 	it("未知のカテゴリを拒否する", () => {
@@ -35,17 +77,6 @@ describe("postFrontmatterSchema", () => {
 				title: "タイトル",
 				date: "2026-08-17",
 				category: "unknown",
-			}),
-		).toThrow();
-	});
-
-	it("未知のタグを拒否する", () => {
-		expect(() =>
-			postFrontmatterSchema.parse({
-				title: "タイトル",
-				date: "2026-08-17",
-				category: "tech",
-				tags: ["Go"],
 			}),
 		).toThrow();
 	});
