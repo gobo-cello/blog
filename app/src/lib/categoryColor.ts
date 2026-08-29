@@ -1,4 +1,4 @@
-import type { Category } from "../content.config";
+import type { Category } from "../content/schema";
 
 /**
  * Tailwind は class 名を静的にしか検出できないため、

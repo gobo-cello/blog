@@ -1,5 +1,31 @@
 {
-	"extends": "astro/tsconfigs/strict",
-	"include": [".astro/types.d.ts", "**/*"],
-	"exclude": ["dist"]
+	"include": [
+		"**/*.ts",
+		"**/*.tsx",
+		"**/.server/**/*",
+		".react-router/types/**/*"
+	],
+	"exclude": ["dist"],
+	"compilerOptions": {
+		"lib": ["DOM", "DOM.Iterable", "ES2022"],
+		"types": ["node", "vite/client"],
+		"target": "ES2022",
+		"module": "preserve",
+		"allowImportingTsExtensions": true,
+		"jsx": "react-jsx",
+		"rootDirs": [".", "./.react-router/types"],
+		"esModuleInterop": true,
+		"verbatimModuleSyntax": true,
+		"isolatedModules": true,
+		"erasableSyntaxOnly": true,
+		"noEmit": true,
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"noImplicitOverride": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitReturns": true,
+		"exactOptionalPropertyTypes": true
+	}
 }

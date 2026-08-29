@@ -58,10 +58,10 @@ function handler(event) {
 }
 `);
 
-const hashedAssetDirectoryName = "_astro";
+const hashedAssetDirectoryName = "assets";
 
 /**
- * "_astro/"配下はAstroがビルド時にコンテンツハッシュ付きファイル名で出力する
+ * "assets/"配下はViteがビルド時にコンテンツハッシュ付きファイル名で出力する
  * 不変アセットであり、内容が変わればパス自体が変わるため無効化しなくても
  * 新旧バージョンのキャッシュキーが衝突しない(ADR 0008)。無効化対象をハッシュの
  * 付かないファイル(HTML・sitemap・favicon等)に絞ることで、デプロイ直後に古い
@@ -156,9 +156,11 @@ export class StaticSiteHosting extends Construct {
 			defaultRootObject: "index.html",
 			errorResponses: [
 				{
+					// React Routerのprerenderは末尾スラッシュなしパス("/404")を
+					// "<path>/index.html"として出力する(トップページを除く)。
 					httpStatus: 404,
 					responseHttpStatus: 404,
-					responsePagePath: "/404.html",
+					responsePagePath: "/404/index.html",
 				} satisfies ErrorResponse,
 				{
 					// private bucketをOrigin Access Control経由で参照する場合、
@@ -166,7 +168,7 @@ export class StaticSiteHosting extends Construct {
 					// キーへのアクセスに404ではなく403 Access Deniedを返す。
 					httpStatus: 403,
 					responseHttpStatus: 404,
-					responsePagePath: "/404.html",
+					responsePagePath: "/404/index.html",
 				} satisfies ErrorResponse,
 			],
 			logBucket: asIBucket(accessLogBucket),

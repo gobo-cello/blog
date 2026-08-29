@@ -10,10 +10,17 @@ import { SandboxDnsStack } from "../lib/stacks/sandbox-dns-stack";
 const app = new App();
 const configuration = loadBlogConfiguration();
 
-// app/distへの絶対path。appとinfraは別々のnpm projectであり、
-// 共有の設定helperを持たないため、実行ファイルからの相対pathで解決する。
-// Sandbox/Production共通。
-const siteContentPath = path.join(__dirname, "..", "..", "app", "dist");
+// app/dist/clientへの絶対path。React Routerのbuildはclient向け静的ファイルを
+// `dist/client`へ出力する。appとinfraは別々のnpm projectであり、共有の設定helperを
+// 持たないため、実行ファイルからの相対pathで解決する。Sandbox/Production共通。
+const siteContentPath = path.join(
+	__dirname,
+	"..",
+	"..",
+	"app",
+	"dist",
+	"client",
+);
 
 new GithubDeployRoleStack(app, "SandboxGithubDeployRoleStack", {
 	env: configuration.sandbox,
