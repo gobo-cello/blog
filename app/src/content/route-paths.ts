@@ -55,6 +55,12 @@ export function getPrerenderPaths(): string[] {
 	return [
 		"/",
 		"/404",
+		// RSS / sitemap は resource route(`routes/rss.xml.ts` / `routes/sitemap.xml.ts`)
+		// として prerender する。ファイルそのものなので末尾スラッシュは付けない
+		// (付けると `<path>/index.html` 相当の扱いになる)。sitemap は自身とフィードを
+		// 列挙しないため、`getSitemapPaths` には加えない。
+		"/rss.xml",
+		"/sitemap.xml",
 		...categories.map((category) => `/categories/${category}`),
 		...tags.map((tag) => `/tags/${tag}`),
 		...posts.map((slug) => `/posts/${slug}`),

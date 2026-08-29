@@ -5,13 +5,11 @@ const config: KnipConfig = {
 	workspaces: {
 		".": {},
 		app: {
-			// react-router.config.ts の buildEnd()(feed.ts)と prerender()
-			// (route-paths.ts)から到達する。knip の react-router プラグインは
-			// これらの hook の import を追わないため、hook が参照するモジュールを
-			// 直接 entry として明示する。route-paths.ts は sitemap 経由(feed.ts)
-			// でも参照されるが、prerender 経路は production mode で追跡されないため
-			// 個別に指定する。
-			entry: ["src/content/feed.ts!", "src/content/route-paths.ts!"],
+			// route-paths.ts は react-router.config.ts の prerender() からのみ
+			// 到達する。knip の react-router プラグインはこの hook の import を
+			// 追わないため、直接 entry として明示する。feed.ts は resource route
+			// (routes/{rss,sitemap}.xml.ts)経由で routes.ts から辿れるため不要。
+			entry: ["src/content/route-paths.ts!"],
 			project: [
 				"**/*.{js,mjs,cjs,jsx,ts,tsx,mts,cts,css}!",
 				// CI 専用の未使用画像チェック。本番同梱物ではないため production では対象外。

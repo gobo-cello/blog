@@ -1,10 +1,15 @@
-import { writeFileSync } from "node:fs";
-import { join } from "node:path";
-import { resolveSiteConfig } from "../config/site";
 import { sortPostsByDateDesc } from "../lib/sort";
 import { plainTitle } from "../lib/title";
 import { getPublishedPosts } from "./posts";
 import { getSitemapPaths } from "./route-paths";
+
+/**
+ * RSS / sitemap の本文を組み立てる純粋な文字列ビルダー群。副作用を持たないため、
+ * `routes/rss.xml.ts` / `routes/sitemap.xml.ts` の resource route の loader から
+ * 呼ばれ、prerender 時に `dist/client/{rss,sitemap}.xml` へ書き出される。
+ * `getPublishedPosts` は Node の `fs` で記事を読むため、`ssr: false` の
+ * ビルドプロセス内(ランタイムサーバーなし)からでも実行できる。
+ */
 
 const FEED_TITLE = "ごぼうのブログ";
 const FEED_DESCRIPTION = "ごぼうのブログです。";
@@ -18,7 +23,7 @@ function escapeXml(text: string): string {
 		.replaceAll("'", "&apos;");
 }
 
-function buildRss(siteUrl: string): string {
+export function buildRss(siteUrl: string): string {
 	const items = sortPostsByDateDesc(getPublishedPosts())
 		.map((post) => {
 			const link = `${siteUrl}/posts/${post.slug}/`;
@@ -43,7 +48,7 @@ ${items}
 `;
 }
 
-function buildSitemap(siteUrl: string): string {
+export function buildSitemap(siteUrl: string): string {
 	const urls = getSitemapPaths()
 		.map((path) => `\t<url><loc>${escapeXml(`${siteUrl}${path}`)}</loc></url>`)
 		.join("\n");
@@ -53,16 +58,4 @@ function buildSitemap(siteUrl: string): string {
 ${urls}
 </urlset>
 `;
-}
-
-/**
- * RSS / sitemap は React Router の integration を持たないため、
- * `react-router.config.ts` の `buildEnd` から prerender 済みの静的ファイル群
- * (`dist/client/`)へ直接書き出す。`getPublishedPosts` は Node の `fs` で
- * 記事を読むため、Vite / React Router のビルドプロセス外からでも呼べる。
- */
-export function writeFeedFiles(clientDir: string): void {
-	const siteUrl = resolveSiteConfig(process.env).siteUrl;
-	writeFileSync(join(clientDir, "rss.xml"), buildRss(siteUrl));
-	writeFileSync(join(clientDir, "sitemap.xml"), buildSitemap(siteUrl));
 }
