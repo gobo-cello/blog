@@ -16,6 +16,8 @@
 		"rootDirs": [".", "./.react-router/types"],
 		"esModuleInterop": true,
 		"verbatimModuleSyntax": true,
+		"isolatedModules": true,
+		"erasableSyntaxOnly": true,
 		"noEmit": true,
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
