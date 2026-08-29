@@ -1,6 +1,6 @@
 import type { Post } from "../content/schema";
-import { renderTitleHtml } from "../lib/title";
 import CategoryBadge from "./CategoryBadge";
+import Title from "./Title";
 
 interface PostListProps {
 	posts: Post[];
@@ -18,11 +18,9 @@ export default function PostList({
 					<a
 						href={`/posts/${post.slug}/`}
 						className="text-lg font-semibold text-foreground no-underline hover:text-accent"
-						// biome-ignore lint/security/noDangerouslySetInnerHtml: renderTitleHtml は HTML エスケープ済みの文字列を返す
-						dangerouslySetInnerHTML={{
-							__html: renderTitleHtml(post.data.title),
-						}}
-					/>
+					>
+						<Title title={post.data.title} />
+					</a>
 					<div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted">
 						<p>{post.data.date.toISOString().slice(0, 10)}</p>
 						{showCategory && (

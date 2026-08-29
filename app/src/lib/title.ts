@@ -1,25 +1,21 @@
 const INLINE_CODE_PATTERN = /`([^`]+)`/g;
 
-function escapeHtml(text: string): string {
-	return text
-		.replaceAll("&", "&amp;")
-		.replaceAll("<", "&lt;")
-		.replaceAll(">", "&gt;")
-		.replaceAll('"', "&quot;")
-		.replaceAll("'", "&#39;");
+export interface TitleSegment {
+	code: boolean;
+	text: string;
 }
 
 /**
- * タイトル文字列中の `code` 記法を <code> 要素に変換した HTML を返す。
- * 記事タイトルや一覧の見出しなど、装飾表示が必要な箇所で使用する。
+ * タイトル文字列を `code` 記法で区切り、各区間が code かどうかを持つ配列にする。
+ * `String.prototype.split` に捕捉グループ付き正規表現を渡すと、奇数番目の要素が
+ * バッククォートで囲まれた中身になる(INLINE_CODE_PATTERN のグループ 1)。
+ * この分割規則は plainTitle と共通で、HTML 文字列ではなく描画用の構造だけを返す。
+ * 実際の <code> 要素の生成は components/Title.tsx が React 要素として行う。
  */
-export function renderTitleHtml(title: string): string {
+export function parseTitleSegments(title: string): TitleSegment[] {
 	return title
 		.split(INLINE_CODE_PATTERN)
-		.map((part, index) =>
-			index % 2 === 1 ? `<code>${escapeHtml(part)}</code>` : escapeHtml(part),
-		)
-		.join("");
+		.map((text, index) => ({ code: index % 2 === 1, text }));
 }
 
 /**

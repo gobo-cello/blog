@@ -1,27 +1,51 @@
 import { describe, expect, it } from "vitest";
-import { plainTitle, renderTitleHtml } from "../src/lib/title";
+import { parseTitleSegments, plainTitle } from "../src/lib/title";
 
-describe("renderTitleHtml", () => {
-	it("バッククォートで囲まれた部分を code 要素に変換する", () => {
-		expect(renderTitleHtml("`>/dev/null 2>&1` って何？")).toBe(
-			"<code>&gt;/dev/null 2&gt;&amp;1</code> って何？",
-		);
+describe("parseTitleSegments", () => {
+	it("バッククォートを含まないタイトルは単一のテキスト区間になる", () => {
+		expect(parseTitleSegments("普通の記事タイトル")).toEqual([
+			{ code: false, text: "普通の記事タイトル" },
+		]);
 	});
 
-	it("バッククォートを含まないタイトルはそのまま返す", () => {
-		expect(renderTitleHtml("普通の記事タイトル")).toBe("普通の記事タイトル");
+	it("バッククォートで囲まれた部分を code 区間として切り出す", () => {
+		expect(parseTitleSegments("`>/dev/null 2>&1` って何？")).toEqual([
+			{ code: false, text: "" },
+			{ code: true, text: ">/dev/null 2>&1" },
+			{ code: false, text: " って何？" },
+		]);
 	});
 
-	it("HTML として解釈されうる文字をエスケープする", () => {
-		expect(renderTitleHtml('<script>alert("x")</script>')).toBe(
-			"&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;",
-		);
+	it("複数のコード区間をそれぞれ独立した区間として切り出す", () => {
+		expect(parseTitleSegments("`foo` と `bar` の違い")).toEqual([
+			{ code: false, text: "" },
+			{ code: true, text: "foo" },
+			{ code: false, text: " と " },
+			{ code: true, text: "bar" },
+			{ code: false, text: " の違い" },
+		]);
 	});
 
-	it("複数のコード区間を個別の code 要素に変換する", () => {
-		expect(renderTitleHtml("`foo` と `bar` の違い")).toBe(
-			"<code>foo</code> と <code>bar</code> の違い",
-		);
+	it("隣接するコード区間の間には空のテキスト区間が入る", () => {
+		expect(parseTitleSegments("`foo``bar`")).toEqual([
+			{ code: false, text: "" },
+			{ code: true, text: "foo" },
+			{ code: false, text: "" },
+			{ code: true, text: "bar" },
+			{ code: false, text: "" },
+		]);
+	});
+
+	it("先頭と末尾のコード区間の外側は空のテキスト区間になる", () => {
+		expect(parseTitleSegments("`code`")).toEqual([
+			{ code: false, text: "" },
+			{ code: true, text: "code" },
+			{ code: false, text: "" },
+		]);
+	});
+
+	it("空文字列は空のテキスト区間ひとつになる", () => {
+		expect(parseTitleSegments("")).toEqual([{ code: false, text: "" }]);
 	});
 });
 
