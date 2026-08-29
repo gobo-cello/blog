@@ -63,12 +63,12 @@ describe("StaticSiteHosting", () => {
 						Match.objectLike({
 							ErrorCode: 404,
 							ResponseCode: 404,
-							ResponsePagePath: "/404.html",
+							ResponsePagePath: "/404/index.html",
 						}),
 						Match.objectLike({
 							ErrorCode: 403,
 							ResponseCode: 404,
-							ResponsePagePath: "/404.html",
+							ResponsePagePath: "/404/index.html",
 						}),
 					]),
 				}),
@@ -125,12 +125,12 @@ describe("StaticSiteHosting", () => {
 			template.resourceCountIs("Custom::CDKBucketDeployment", 1);
 		});
 
-		it("CloudFront invalidationはハッシュ付きアセット(_astro/)を除いたパスに絞る", () => {
+		it("CloudFront invalidationはハッシュ付きアセット(assets/)を除いたパスに絞る", () => {
 			template.hasResourceProperties("Custom::CDKBucketDeployment", {
 				DistributionPaths: Match.arrayWith(["/index.html", "/posts/*"]),
 			});
 			template.hasResourceProperties("Custom::CDKBucketDeployment", {
-				DistributionPaths: Match.not(Match.arrayWith(["/_astro/*"])),
+				DistributionPaths: Match.not(Match.arrayWith(["/assets/*"])),
 			});
 		});
 
