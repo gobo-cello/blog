@@ -15,6 +15,10 @@ const config: KnipConfig = {
 				// vite.config.ts から使う MDX ビルドプラグイン。実行時バンドルには含まれない。
 				"!src/mdx/rehype-mermaid-fence.ts!",
 			],
+			// ルートモジュールの `./+types/*` は `react-router typegen` が
+			// .react-router/types/ へ生成する型で、typegen 前(CI の knip ジョブ)は
+			// 解決できない。knip の react-router プラグインもこの生成物は扱わない。
+			ignoreUnresolved: [/^\.\/\+types\//],
 		},
 		infra: {
 			entry: ["bin/infra.ts!"],
