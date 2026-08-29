@@ -28,11 +28,11 @@ export function findUnusedImages(contentDir: string): string[] {
 		}
 
 		const files = readdirSync(entryPath);
-		if (!files.includes("index.md")) {
+		if (!files.includes("index.mdx")) {
 			continue;
 		}
 
-		const markdownContent = readFileSync(join(entryPath, "index.md"), "utf-8");
+		const markdownContent = readFileSync(join(entryPath, "index.mdx"), "utf-8");
 		const imageFiles = files.filter((file) => isImageFile(file));
 
 		for (const imageFile of imageFiles) {

@@ -22,13 +22,13 @@ describe("findUnusedImages", () => {
 	): void {
 		const postDir = join(contentDir, slug);
 		mkdirSync(postDir);
-		writeFileSync(join(postDir, "index.md"), markdownContent);
+		writeFileSync(join(postDir, "index.mdx"), markdownContent);
 		for (const imageFileName of imageFileNames) {
 			writeFileSync(join(postDir, imageFileName), "");
 		}
 	}
 
-	describe("記事ディレクトリにindex.mdが存在する場合", () => {
+	describe("記事ディレクトリにindex.mdxが存在する場合", () => {
 		it("記事から参照されている画像のパスは返さない", () => {
 			createPost(
 				"hello-world",
@@ -51,7 +51,7 @@ describe("findUnusedImages", () => {
 		});
 	});
 
-	describe("記事ディレクトリにindex.mdが存在しない場合", () => {
+	describe("記事ディレクトリにindex.mdxが存在しない場合", () => {
 		it("ディレクトリ内の画像パスは返さない", () => {
 			const dir = join(contentDir, "not-a-post");
 			mkdirSync(dir);

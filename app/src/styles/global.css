@@ -123,3 +123,37 @@
 .prose blockquote code {
 	color: color-mix(in srgb, var(--color-accent) 50%, var(--color-muted));
 }
+
+/*
+ * rehype-pretty-code(Shiki)の出力。コードブロックは figure でラップされ、
+ * ` ```ts title="foo.ts" ` の title はファイル名タブ(figcaption)になる。
+ * pre / トークンの配色は Shiki のインラインスタイルとテーマ背景
+ * (keepBackground)が優先されるため、ここではタブとレイアウトだけ整える。
+ */
+.prose [data-rehype-pretty-code-figure] {
+	margin-top: 1.5rem;
+	margin-bottom: 1.5rem;
+}
+
+.prose [data-rehype-pretty-code-figure] pre {
+	margin: 0;
+}
+
+.prose [data-rehype-pretty-code-title] {
+	border: 1px solid var(--color-border);
+	border-bottom: none;
+	border-radius: 0.375rem 0.375rem 0 0;
+	background-color: color-mix(
+		in srgb,
+		var(--color-border) 45%,
+		var(--color-background)
+	);
+	padding: 0.4rem 0.9rem;
+	font-size: 0.8rem;
+	color: var(--color-muted);
+}
+
+.prose [data-rehype-pretty-code-title] + pre {
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+}
