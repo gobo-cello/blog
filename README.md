@@ -99,18 +99,21 @@ blog/
 │   ├── tsconfig.json
 │   ├── .env.example
 │   └── README.md
-├── app/                   # Astro(静的サイト生成)によるブログ本体(独立npm project)
+├── app/                   # React Router(Framework Mode)によるブログ本体(独立npm project)
 │   ├── src/
-│   │   ├── content/posts/<slug>/index.md  # 記事本体(Markdown)。1記事1ディレクトリ
-│   │   ├── content.config.ts               # content collectionのschema定義(Zod)
+│   │   ├── content/posts/<slug>/index.mdx  # 記事本体(MDX)。1記事1ディレクトリ
+│   │   ├── content/schema.ts               # frontmatterのschema定義(Zod)
 │   │   ├── assets/images/  # 記事やレイアウトから参照する画像
-│   │   ├── components/     # Astroコンポーネント
-│   │   ├── layouts/
+│   │   ├── components/     # Reactコンポーネント
+│   │   ├── mdx/            # MDXのrehypeプラグインと差し込みコンポーネント
 │   │   ├── lib/            # URL生成・ソート・カテゴリ分類などのヘルパー
-│   │   ├── pages/          # ルーティング(一覧・記事・カテゴリ・タグ・RSS)
+│   │   ├── routes/         # ルーティング(一覧・記事・カテゴリ・タグ)
+│   │   ├── routes.ts       # ルート定義
+│   │   ├── root.tsx        # ルートレイアウト
 │   │   └── styles/
 │   ├── scripts/            # 記事から参照されていない画像を検出するCIチェックスクリプトなど
-│   ├── astro.config.ts
+│   ├── vite.config.ts
+│   ├── react-router.config.ts
 │   ├── package.json
 │   └── tsconfig.json
 ├── e2e/                   # デプロイ後のsandbox環境向けE2Eスモークテスト(独立npm project)
@@ -145,12 +148,12 @@ blog/
 - `infra/lib/config/`: secretを含まない環境設定
 - `infra/test/`: CDK templateおよびConstructのテスト
 
-`app/`はAstro(静的サイト生成)によるブログ本体のアプリケーションで、次の責務で分割しています。設計判断の詳細は[ADR 0004](./docs/adr/0004-blog-implementation-approach.md)を参照してください。
+`app/`はReact Router(Framework Mode、`ssr: false` + 全ページprerender)によるブログ本体のアプリケーションで、次の責務で分割しています。設計判断の詳細は[ADR 0004](./docs/adr/0004-blog-implementation-approach.md)・[ADR 0009](./docs/adr/0009-app-react-router-mdx-migration.md)を参照してください。
 
-- `app/src/content/posts/`: 記事本体(Markdown)。`<slug>/index.md` の形式で1記事1ディレクトリ
-- `app/src/content.config.ts`: content collectionのschema定義(Zod)
+- `app/src/content/posts/`: 記事本体(MDX)。`<slug>/index.mdx` の形式で1記事1ディレクトリ
+- `app/src/content/schema.ts`: frontmatterのschema定義(Zod)
 - `app/src/assets/images/`: 記事やレイアウトから参照する画像
-- `app/src/components/`・`app/src/layouts/`・`app/src/pages/`・`app/src/styles/`: UIコンポーネント、レイアウト、ルーティング、スタイル
+- `app/src/components/`・`app/src/routes/`・`app/src/root.tsx`・`app/src/styles/`: UIコンポーネント、ルーティング、ルートレイアウト、スタイル
 - `app/src/lib/`: URL生成、ソート、カテゴリ分類などのヘルパー
 - `app/scripts/`: 記事から参照されていない画像を検出するCIチェックスクリプトなど
 
@@ -211,7 +214,7 @@ cd app
 npm ci
 ```
 
-`app/.env.local`(gitignore対象、`.env.example`を元に作成)に`BLOG_DOMAIN_NAME`を設定します。`.env.local`は`astro.config.ts`が自動読み込みするため、`npm run dev`・`npm run build`実行前に手動でsourceする必要はありません。
+`app/.env.local`(gitignore対象、`.env.example`を元に作成)に`BLOG_DOMAIN_NAME`を設定します。`.env.local`は`vite.config.ts`が自動読み込みするため、`npm run dev`・`npm run build`実行前に手動でsourceする必要はありません。
 
 ローカル開発サーバーを起動します。
 
@@ -307,7 +310,7 @@ GitHub ActionsからAWSへは、OIDCによる一時認証だけを使用しま�
 
 5. 次のGitHub Variablesを登録します。
 
-   - Repository Variables: `AWS_BLOG_SANDBOX_ACCOUNT_ID`、`AWS_BLOG_PRODUCTION_ACCOUNT_ID`、`APEX_DOMAIN_NAME`(headerからlandingへリンクするapexドメイン名。`app/src/layouts/BaseLayout.astro`のリンク生成に使用)
+   - Repository Variables: `AWS_BLOG_SANDBOX_ACCOUNT_ID`、`AWS_BLOG_PRODUCTION_ACCOUNT_ID`、`APEX_DOMAIN_NAME`(headerからlandingへリンクするapexドメイン名。`app/src/root.tsx`のリンク生成に使用)
    - Environment `sandbox` Variables: `AWS_BLOG_SANDBOX_DEPLOY_ROLE_ARN`(手順3のSandbox側ARN)
    - Environment `production` Variables: `AWS_BLOG_PRODUCTION_DEPLOY_ROLE_ARN`(手順3のProduction側ARN)
 

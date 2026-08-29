@@ -107,7 +107,7 @@ Stack IDは`Sandbox*` / `Production*`のprefixで、deploy先accountを表す。
 
 ### Workflow構成
 
-- `pr-ci-gate.yml`: Pull Requestで`biome`・`build`・`jest`・`cdk synth`・`cdk diff`(sandbox environmentのcredentialを使用)を実行する。`HostingStack`の`BucketDeployment`が`app/dist`の実在をsynth時に要求するため、`cdk synth`・`cdk diff`の実行前に`app/`をビルドする。
+- `pr-ci-gate.yml`: Pull Requestで`biome`・`build`・`jest`・`cdk synth`・`cdk diff`(sandbox environmentのcredentialを使用)を実行する。`HostingStack`の`BucketDeployment`が`app/dist/client`の実在をsynth時に要求するため、`cdk synth`・`cdk diff`の実行前に`app/`をビルドする。
 - `deploy.yml`: `main`へのmerge後、`sandbox` job(GitHub Environment `sandbox`、承認ルールなし)がSandbox用stackを自動deployする。`production` job(GitHub Environment `production`、Required Reviewers)は`needs: sandbox`で`sandbox` jobの成功に依存し、承認後にProduction用stackをdeployする。`sandbox`/`production`両jobとも、`cdk`コマンド実行前に`app/`をビルドする(理由は上記と同じ)。triggerの`paths`にも`app/**`を含め、ブログ記事など`app/`だけの変更でも自動デプロイされるようにしている。
 
 1つのworkflow内で`needs:`により`sandbox` job → `production` job の順序を保証している。これにより、Sandboxへのdeployが失敗した場合はProduction jobがそもそも実行されず、Required Reviewersの承認さえ通ればdeployできてしまう、という抜け道を防ぐ。両jobは同じworkflow実行内にあるため、checkoutされるcommitも自然に同一になる(将来e2eテストのjobを追加する場合も、`production`の`needs`をそのjobに差し替えるだけでよい)。
@@ -138,9 +138,9 @@ apex側の判断(ADR参照)と同じ理由により、このリポジトリ側�
 
 ## ブログアプリケーションの実装方式
 
-ブログ本体は`app/`ディレクトリにAstro(静的サイト生成)で実装する。`infra/`とは独立したnpm projectとし、互いのビルドツールチェーンやlockfileを汚染しない。
+ブログ本体は`app/`ディレクトリにReact Router(Framework Mode)で実装する。`infra/`とは独立したnpm projectとし、互いのビルドツールチェーンやlockfileを汚染しない。ランタイムサーバーは持たず(`ssr: false`)、全ページをビルド時にprerenderして`dist/client/`へ静的ファイルとして出力する。
 
-設計判断の詳細な経緯は[ADR 0004](./adr/0004-blog-implementation-approach.md)を参照。
+設計判断の詳細な経緯は[ADR 0004](./adr/0004-blog-implementation-approach.md)・[ADR 0009](./adr/0009-app-react-router-mdx-migration.md)を参照。
 
 ### ディレクトリ構成
 
@@ -148,35 +148,38 @@ apex側の判断(ADR参照)と同じ理由により、このリポジトリ側�
 app/
 ├── src/
 │   ├── content/
-│   │   └── blog/
-│   │       └── <slug>/
-│   │           ├── index.md   # frontmatter + 本文
-│   │           └── *.jpg,png  # colocateされた画像
-│   ├── content.config.ts      # content collectionのschema定義(Zod)
-│   ├── layouts/
-│   │   └── BaseLayout.astro
-│   └── pages/
-│       ├── index.astro
-│       ├── posts/[slug].astro
-│       ├── categories/[category].astro
-│       ├── tags/[tag].astro
-│       ├── rss.xml.ts
-│       └── 404.astro
+│   │   ├── posts/
+│   │   │   └── <slug>/
+│   │   │       ├── index.mdx  # frontmatter + 本文(MDX)
+│   │   │       └── *.jpg,png  # colocateされた画像
+│   │   ├── schema.ts          # frontmatterのschema定義(Zod)
+│   │   ├── posts.ts           # 記事の読み込み(Node fs、ビルド時のみ実行)
+│   │   └── feed.ts            # RSS / sitemap 生成(buildEndから実行)
+│   ├── components/            # Reactコンポーネント
+│   ├── mdx/                   # MDXのrehypeプラグインと差し込みコンポーネント
+│   ├── routes/
+│   │   ├── home.tsx
+│   │   ├── post.tsx
+│   │   ├── category.tsx
+│   │   ├── tag.tsx
+│   │   └── not-found.tsx
+│   ├── routes.ts
+│   └── root.tsx
 └── scripts/
     └── check-unused-images.ts # 記事から未参照の画像を検出するCIチェック
 ```
 
-記事は`src/content/blog/<slug>/index.md`に、Astro 6以降のContent Layer API(`defineCollection` + `glob()` loader)で読み込む。`index.md`を持つディレクトリ名がそのままURLのslugになる。画像は記事ディレクトリにcolocationし、`public/`ではなく`src/`配下に置くことでAstroのビルド時最適化(`astro:assets`)を効かせる。
+記事は`src/content/posts/<slug>/index.mdx`に置き、`src/content/posts.ts`がNodeの`fs`で直接読み込む(`loader`はビルド時のprerenderでのみ実行される)。`index.mdx`を持つディレクトリ名がそのままURLのslugになる。MDX本文は`routes/post.tsx`が`import.meta.glob`で取得する。画像は記事ディレクトリにcolocationする。
 
-frontmatter schema: `title`・`description`・`date`・`category`(単一の主分類)・`tags`(複数可)・`cover`(colocated画像への相対パス)・`draft`。
+frontmatter schema: `title`・`date`・`category`(単一の主分類)・`tags`(複数可)・`draft`。
 
 ### URL設計
 
 - 記事: `/posts/<slug>/`
 - カテゴリ別アーカイブ: `/categories/<category>/`
 - タグ別アーカイブ: `/tags/<tag>/`
-- RSS: `/rss.xml`(`@astrojs/rss`)
-- サイトマップ: `/sitemap-index.xml`(`@astrojs/sitemap`)
+- RSS: `/rss.xml`(`src/content/feed.ts`がbuildEndで生成)
+- サイトマップ: `/sitemap.xml`(同上、単一ファイル)
 
 ドメイン自体が`blog.example.com`であるため、`/blog/`のようなprefixは付けない。
 
@@ -186,11 +189,11 @@ frontmatter schema: `title`・`description`・`date`・`category`(単一の主�
 
 ### テストとツールチェーン
 
-`app/`はAstroがViteネイティブであることから、`infra/`のJestとは別にVitestを使う。型チェックに使う`@astrojs/check`のpeer dependency制約により、`app/`のTypeScriptは`infra/`より低いバージョン(6系)に留める。
+`app/`はReact RouterがViteネイティブであることから、`infra/`のJestとは別にVitestを使う。TypeScriptは`infra/`・ルートと同じ`^7`に揃える。
 
 ## 静的サイトホスティング
 
-ブログ配信用のS3・CloudFrontは、`infra/lib/constructs/static-site-hosting.ts`の`StaticSiteHosting` constructとしてまとめて実装する。S3 bucket(private、OAC経由でのみCloudFrontからアクセス可能)・CloudFront Distribution(ACM証明書+カスタムドメイン、404は`app/src/pages/404.astro`のビルド後ファイルへマッピング)・CloudFront標準アクセスログ用bucket・`BucketDeployment`(`app/dist`をS3へ同期し、CloudFront invalidationも行う)・Route 53 aliasレコードを持つ。
+ブログ配信用のS3・CloudFrontは、`infra/lib/constructs/static-site-hosting.ts`の`StaticSiteHosting` constructとしてまとめて実装する。S3 bucket(private、OAC経由でのみCloudFrontからアクセス可能)・CloudFront Distribution(ACM証明書+カスタムドメイン、404は`not-found`ルートのprerender出力`/404/index.html`へマッピング)・CloudFront標準アクセスログ用bucket・`BucketDeployment`(`app/dist/client`をS3へ同期し、CloudFront invalidationも行う)・Route 53 aliasレコードを持つ。
 
 `BucketDeployment`を使うことで、実際のS3同期・invalidationはCDKが管理するLambda(bootstrapの`cfn-exec-role`経由)が行う。GitHub Actions側で`aws s3 sync`は行わないため、上記Trust chainで説明した「`GithubDeployRole`自体には具体的なAWS resourceへの権限を持たせない」という設計と一貫する。
 
