@@ -15,7 +15,8 @@ import { rehypeMermaidFence } from "./src/mdx/rehype-mermaid-fence.ts";
  * infra/ の `.env.local`(`cdk.json` の `--env-file-if-exists`)と同様に、
  * ローカル開発では `.env.local` を読み込む。ここで `process.env` へ橋渡しして
  * おくことで、Node のビルドプロセス内で `process.env` を読む `src/config/site.ts`
- * (`buildEnd` の RSS / sitemap 生成から呼ばれる)が `.env.local` の値を拾える。
+ * (prerender 時に RSS / sitemap の resource route loader から呼ばれる)が
+ * `.env.local` の値を拾える。
  * Vite の `import.meta.env` はビルド対象コード側の仕組みで、ここには届かない。
  * CI で明示的に渡された環境変数を上書きしないよう、未設定のキーだけ補う。
  */
