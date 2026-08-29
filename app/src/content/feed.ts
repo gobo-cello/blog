@@ -1,10 +1,10 @@
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { categoriesWithPosts } from "../lib/categories";
 import { resolveSiteUrl } from "../lib/site-url";
 import { sortPostsByDateDesc } from "../lib/sort";
 import { plainTitle } from "../lib/title";
 import { getPublishedPosts } from "./posts";
+import { getSitemapPaths } from "./route-paths";
 
 const FEED_TITLE = "ごぼうのブログ";
 const FEED_DESCRIPTION = "ごぼうのブログです。";
@@ -44,17 +44,7 @@ ${items}
 }
 
 function buildSitemap(siteUrl: string): string {
-	const posts = sortPostsByDateDesc(getPublishedPosts());
-	const paths = [
-		"/",
-		...categoriesWithPosts(posts).map((category) => `/categories/${category}/`),
-		...[...new Set(posts.flatMap((post) => post.data.tags))].map(
-			(tag) => `/tags/${tag}/`,
-		),
-		...posts.map((post) => `/posts/${post.slug}/`),
-	];
-
-	const urls = paths
+	const urls = getSitemapPaths()
 		.map((path) => `\t<url><loc>${escapeXml(`${siteUrl}${path}`)}</loc></url>`)
 		.join("\n");
 
