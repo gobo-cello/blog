@@ -9,6 +9,13 @@
 	--color-accent: #a24e2c;
 
 	/*
+	 * Mermaid のノード塗り(surface)用。background と border の中間の明るさで、
+	 * 図のノード面を本文背景から浮かせる。本文側では今のところ未使用だが、
+	 * Mermaid のテーマ色をここ(global.css)へ一本化するための単一の正とする。
+	 */
+	--color-surface: #efede8;
+
+	/*
 	 * カテゴリ識別用の配色。3色とも OKLCH の色差(CVD シミュレーション込み)を
 	 * 検証済みで、隣接色との判別しやすさを確保している。
 	 */
