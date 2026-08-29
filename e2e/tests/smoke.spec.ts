@@ -20,17 +20,10 @@ test("トップページが表示される", async ({ page }) => {
 
 test("sitemapに掲載された全ページが表示される", async ({ page, request }) => {
 	// sitemapのURLはbuild時に固定されたsite("https://blog.example.com")の
-	// ホスト名を含む(sandbox/productionでapp/distを共用しているため)。
+	// ホスト名を含む(sandbox/productionでapp/dist/clientを共用しているため)。
 	// ホスト名は無視し、pathだけをテスト対象のbase URLに付け替えて確認する。
-	const indexXml = await (await request.get("/sitemap-index.xml")).text();
-	const shardPaths = extractPaths(indexXml);
-	expect(shardPaths.length).toBeGreaterThan(0);
-
-	const pagePaths: string[] = [];
-	for (const shardPath of shardPaths) {
-		const shardXml = await (await request.get(shardPath)).text();
-		pagePaths.push(...extractPaths(shardXml));
-	}
+	const sitemapXml = await (await request.get("/sitemap.xml")).text();
+	const pagePaths = extractPaths(sitemapXml);
 	expect(pagePaths.length).toBeGreaterThan(0);
 
 	for (const path of pagePaths) {
