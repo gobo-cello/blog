@@ -1,6 +1,4 @@
-import { join } from "node:path";
 import type { Config } from "@react-router/dev/config";
-import { writeFeedFiles } from "./src/content/feed";
 import { getPrerenderPaths } from "./src/content/route-paths";
 
 export default {
@@ -12,12 +10,9 @@ export default {
 	ssr: false,
 	async prerender() {
 		// prerender と sitemap で対象パスの導出が二重管理にならないよう、
-		// 一覧は `src/content/route-paths.ts` に集約している。
+		// 一覧は `src/content/route-paths.ts` に集約している。RSS / sitemap も
+		// resource route(`src/routes/{rss,sitemap}.xml.ts`)として prerender され、
+		// その本文が `dist/client/{rss,sitemap}.xml` へ書き出される。
 		return getPrerenderPaths();
-	},
-	buildEnd({ reactRouterConfig }) {
-		// RSS / sitemap は integration を持たないため、prerender 済みの
-		// クライアント出力ディレクトリへ直接書き出す。
-		writeFeedFiles(join(reactRouterConfig.buildDirectory, "client"));
 	},
 } satisfies Config;
