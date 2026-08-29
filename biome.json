@@ -8,6 +8,7 @@
 	"linter": {
 		"domains": {
 			"project": "recommended",
+			"react": "recommended",
 			"types": "recommended"
 		},
 		"rules": {
@@ -22,17 +23,6 @@
 		}
 	},
 	"overrides": [
-		{
-			"includes": ["**/*.astro"],
-			"linter": {
-				"rules": {
-					"correctness": {
-						"noUnusedImports": "off",
-						"noUnusedVariables": "off"
-					}
-				}
-			}
-		},
 		{
 			"includes": ["**/*.html"],
 			"html": {

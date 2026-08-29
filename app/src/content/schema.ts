@@ -13,7 +13,7 @@ export const postFrontmatterSchema = z.object({
 	draft: z.boolean().default(false),
 });
 
-export type PostFrontmatter = z.infer<typeof postFrontmatterSchema>;
+type PostFrontmatter = z.infer<typeof postFrontmatterSchema>;
 
 export interface Post {
 	slug: string;
