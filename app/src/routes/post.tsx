@@ -4,8 +4,9 @@ import type { ComponentType } from "react";
 import { data } from "react-router";
 import CategoryBadge from "../components/CategoryBadge";
 import TableOfContents from "../components/TableOfContents";
+import Title from "../components/Title";
 import { getPublishedPostBySlug } from "../content/posts";
-import { plainTitle, renderTitleHtml } from "../lib/title";
+import { plainTitle } from "../lib/title";
 import { mdxComponents } from "../mdx/components";
 import type { Route } from "./+types/post";
 
@@ -63,11 +64,9 @@ export default function PostPage({ loaderData }: Route.ComponentProps) {
 	return (
 		<div className="lg:grid lg:grid-cols-[42rem_16rem] lg:items-start lg:gap-8">
 			<article className="min-w-0">
-				<h1
-					className="text-3xl font-bold"
-					// biome-ignore lint/security/noDangerouslySetInnerHtml: renderTitleHtml は HTML エスケープ済みの文字列を返す
-					dangerouslySetInnerHTML={{ __html: renderTitleHtml(post.data.title) }}
-				/>
+				<h1 className="text-3xl font-bold">
+					<Title title={post.data.title} />
+				</h1>
 				<div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted">
 					<p>{post.data.date.toISOString().slice(0, 10)}</p>
 					<span aria-hidden="true">·</span>

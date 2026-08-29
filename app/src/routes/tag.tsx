@@ -1,7 +1,7 @@
 import { data } from "react-router";
+import Title from "../components/Title";
 import { getPublishedPosts } from "../content/posts";
 import { sortPostsByDateDesc } from "../lib/sort";
-import { renderTitleHtml } from "../lib/title";
 import type { Route } from "./+types/tag";
 
 export function loader({ params }: Route.LoaderArgs) {
@@ -39,11 +39,9 @@ export default function TagPage({ loaderData }: Route.ComponentProps) {
 						<a
 							href={`/posts/${post.slug}/`}
 							className="text-foreground no-underline hover:text-accent"
-							// biome-ignore lint/security/noDangerouslySetInnerHtml: renderTitleHtml は HTML エスケープ済みの文字列を返す
-							dangerouslySetInnerHTML={{
-								__html: renderTitleHtml(post.data.title),
-							}}
-						/>
+						>
+							<Title title={post.data.title} />
+						</a>
 					</li>
 				))}
 			</ul>
