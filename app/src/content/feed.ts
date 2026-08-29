@@ -1,6 +1,6 @@
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { resolveSiteUrl } from "../lib/site-url";
+import { resolveSiteConfig } from "../config/site";
 import { sortPostsByDateDesc } from "../lib/sort";
 import { plainTitle } from "../lib/title";
 import { getPublishedPosts } from "./posts";
@@ -62,7 +62,7 @@ ${urls}
  * 記事を読むため、Vite / React Router のビルドプロセス外からでも呼べる。
  */
 export function writeFeedFiles(clientDir: string): void {
-	const siteUrl = resolveSiteUrl(process.env.BLOG_DOMAIN_NAME);
+	const siteUrl = resolveSiteConfig(process.env).siteUrl;
 	writeFileSync(join(clientDir, "rss.xml"), buildRss(siteUrl));
 	writeFileSync(join(clientDir, "sitemap.xml"), buildSitemap(siteUrl));
 }
