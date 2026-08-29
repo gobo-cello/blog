@@ -11,7 +11,9 @@ import {
 import "./styles/global.css";
 import { plainTitle } from "./lib/title";
 
-// vite.config.ts の define でビルド時に静的な文字列へ置き換えられる。
+// クライアントバンドルは process.env を持たないため、vite.config.ts の define が
+// ビルド時にこの参照を静的な文字列へ置き換える。環境変数名と既定値の source of
+// truth は src/config/site.ts(こちらは Node 実行前提のため client からは import しない)。
 const apexDomainName = process.env.APEX_DOMAIN_NAME || "example.com";
 
 interface RouteHandle {
