@@ -17,6 +17,26 @@ import { type Post, postFrontmatterSchema } from "./schema";
  */
 const POSTS_DIR = join(process.cwd(), "src", "content", "posts");
 
+/**
+ * 1 記事ぶんの生テキストから frontmatter を取り出してスキーマ検証する純粋関数。
+ *
+ * ここを関数として切り出すのは、`postFrontmatterSchema.parse()` が投げる `ZodError`
+ * にはどの記事が原因かの情報が一切含まれず、1 記事の frontmatter 不備で
+ * `react-router build` が文脈のないスタックトレースだけを残して落ちるため。
+ * どの記事ディレクトリが原因かをメッセージに載せ、原因の詳細を失わないよう
+ * 元エラー(`ZodError` や YAML パースエラー)は `cause` に連鎖させる。
+ */
+function parsePost(slug: string, raw: string): Post {
+	try {
+		const { data } = matter(raw);
+		return { slug, data: postFrontmatterSchema.parse(data) };
+	} catch (err) {
+		throw new Error(`記事の frontmatter が不正です: ${slug}/index.mdx`, {
+			cause: err,
+		});
+	}
+}
+
 function readPublishedPosts(): Post[] {
 	const posts: Post[] = [];
 	for (const entry of readdirSync(POSTS_DIR, { withFileTypes: true })) {
@@ -33,12 +53,11 @@ function readPublishedPosts(): Post[] {
 			continue;
 		}
 
-		const { data } = matter(raw);
-		const frontmatter = postFrontmatterSchema.parse(data);
-		if (frontmatter.draft) {
+		const post = parsePost(entry.name, raw);
+		if (post.data.draft) {
 			continue;
 		}
-		posts.push({ slug: entry.name, data: frontmatter });
+		posts.push(post);
 	}
 	return posts;
 }
