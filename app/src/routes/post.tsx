@@ -1,7 +1,7 @@
 import type { Toc } from "@stefanprobst/rehype-extract-toc";
 import type { MDXProps } from "mdx/types";
 import type { ComponentType } from "react";
-import { data } from "react-router";
+import { data, Link } from "react-router";
 import CategoryBadge from "../components/CategoryBadge";
 import TableOfContents from "../components/TableOfContents";
 import Title from "../components/Title";
@@ -86,12 +86,13 @@ export default function PostPage({ loaderData }: Route.ComponentProps) {
 						<ul className="m-0 flex list-none flex-wrap gap-2 p-0">
 							{post.tags.map((tag) => (
 								<li key={tag}>
-									<a
-										href={`/tags/${tag}`}
+									<Link
+										to={`/tags/${tag}`}
+										prefetch="intent"
 										className="rounded-full border border-border px-3 py-1 text-sm text-muted no-underline hover:border-accent hover:text-accent"
 									>
 										#{tag}
-									</a>
+									</Link>
 								</li>
 							))}
 						</ul>

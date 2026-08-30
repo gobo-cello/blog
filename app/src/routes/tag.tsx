@@ -1,4 +1,4 @@
-import { data } from "react-router";
+import { data, Link } from "react-router";
 import Title from "../components/Title";
 import { getPublishedPosts } from "../content/posts";
 import { sortPostsByDateDesc } from "../lib/sort";
@@ -32,12 +32,13 @@ export default function TagPage({ loaderData }: Route.ComponentProps) {
 			<ul className="mt-4 list-none divide-y divide-border p-0">
 				{posts.map((post) => (
 					<li key={post.slug} className="py-3 first:pt-0">
-						<a
-							href={`/posts/${post.slug}`}
+						<Link
+							to={`/posts/${post.slug}`}
+							prefetch="intent"
 							className="text-foreground no-underline hover:text-accent"
 						>
 							<Title title={post.title} />
-						</a>
+						</Link>
 					</li>
 				))}
 			</ul>

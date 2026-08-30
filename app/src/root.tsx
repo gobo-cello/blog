@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import {
 	isRouteErrorResponse,
+	Link,
 	Links,
 	Meta,
 	Outlet,
@@ -53,12 +54,13 @@ export function Layout({ children }: { children: ReactNode }) {
 					<div
 						className={`flex items-center justify-between py-4 ${containerClass}`}
 					>
-						<a
-							href="/"
+						<Link
+							to="/"
+							prefetch="intent"
 							className="text-foreground no-underline hover:text-accent"
 						>
 							ごぼうのブログ
-						</a>
+						</Link>
 						<a
 							href={`https://${apexDomainName}`}
 							className="text-foreground no-underline hover:text-accent"
