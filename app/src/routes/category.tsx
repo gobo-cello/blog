@@ -35,7 +35,7 @@ export default function CategoryPage({ loaderData }: Route.ComponentProps) {
 	const { category, categories, posts } = loaderData;
 	return (
 		<>
-			<h1 className="text-2xl font-bold">最新の記事</h1>
+			<h1 className="text-2xl font-bold">{category}</h1>
 			<CategoryTabs categories={categories} active={category} />
 			<PostList posts={posts} />
 		</>
