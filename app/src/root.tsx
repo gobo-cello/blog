@@ -9,6 +9,7 @@ import {
 	useMatches,
 } from "react-router";
 import "./styles/global.css";
+import NotFound from "./components/NotFound";
 import { plainTitle } from "./lib/title";
 
 // クライアントバンドルは process.env を持たないため、vite.config.ts の define が
@@ -78,14 +79,13 @@ export default function Root() {
 
 export function ErrorBoundary({ error }: { error: unknown }) {
 	const is404 = isRouteErrorResponse(error) && error.status === 404;
+	if (is404) {
+		return <NotFound />;
+	}
 	return (
 		<>
-			<h1>{is404 ? "404" : "エラー"}</h1>
-			<p>
-				{is404
-					? "ページが見つかりませんでした。"
-					: "予期しないエラーが発生しました。"}
-			</p>
+			<h1>エラー</h1>
+			<p>予期しないエラーが発生しました。</p>
 			<a href="/">トップページへ戻る</a>
 		</>
 	);
