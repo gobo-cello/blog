@@ -8,16 +8,14 @@ export function loader({ params }: Route.LoaderArgs) {
 	const posts = getPublishedPosts();
 	const { tag } = params;
 	const presentTags: string[] = [
-		...new Set(posts.flatMap((post) => post.data.tags)),
+		...new Set(posts.flatMap((post) => post.tags)),
 	];
 	if (!presentTags.includes(tag)) {
 		throw data(null, { status: 404 });
 	}
 	return {
 		tag,
-		posts: sortPostsByDateDesc(
-			posts.filter((post) => post.data.tags.includes(tag)),
-		),
+		posts: sortPostsByDateDesc(posts.filter((post) => post.tags.includes(tag))),
 	};
 }
 
@@ -38,7 +36,7 @@ export default function TagPage({ loaderData }: Route.ComponentProps) {
 							href={`/posts/${post.slug}/`}
 							className="text-foreground no-underline hover:text-accent"
 						>
-							<Title title={post.data.title} />
+							<Title title={post.title} />
 						</a>
 					</li>
 				))}

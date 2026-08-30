@@ -59,7 +59,7 @@ export const handle = { wide: true };
 export const meta: Route.MetaFunction = ({ loaderData }) => [
 	{
 		title: loaderData
-			? plainTitle(loaderData.post.data.title)
+			? plainTitle(loaderData.post.title)
 			: "記事が見つかりません",
 	},
 ];
@@ -76,15 +76,15 @@ export default function PostPage({ loaderData }: Route.ComponentProps) {
 		<div className="lg:grid lg:grid-cols-[42rem_16rem] lg:items-start lg:gap-8">
 			<article className="min-w-0">
 				<h1 className="text-3xl font-bold">
-					<Title title={post.data.title} />
+					<Title title={post.title} />
 				</h1>
 				<div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted">
-					<p>{post.data.date.toISOString().slice(0, 10)}</p>
+					<p>{post.date.toISOString().slice(0, 10)}</p>
 					<span aria-hidden="true">·</span>
-					<CategoryBadge category={post.data.category} />
-					{post.data.tags.length > 0 && (
+					<CategoryBadge category={post.category} />
+					{post.tags.length > 0 && (
 						<ul className="m-0 flex list-none flex-wrap gap-2 p-0">
-							{post.data.tags.map((tag) => (
+							{post.tags.map((tag) => (
 								<li key={tag}>
 									<a
 										href={`/tags/${tag}/`}

@@ -29,7 +29,7 @@ const POSTS_DIR = join(process.cwd(), "src", "content", "posts");
 function parsePost(slug: string, raw: string): Post {
 	try {
 		const { data } = matter(raw);
-		return { slug, data: postFrontmatterSchema.parse(data) };
+		return { slug, ...postFrontmatterSchema.parse(data) };
 	} catch (err) {
 		throw new Error(`記事の frontmatter が不正です: ${slug}/index.mdx`, {
 			cause: err,
@@ -54,7 +54,7 @@ function readPublishedPosts(): Post[] {
 		}
 
 		const post = parsePost(entry.name, raw);
-		if (post.data.draft) {
+		if (post.draft) {
 			continue;
 		}
 		posts.push(post);

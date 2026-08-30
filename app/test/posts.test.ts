@@ -12,7 +12,7 @@ describe("getPublishedPosts", () => {
 	});
 
 	it("下書きを含めない", () => {
-		expect(posts.every((post) => post.data.draft === false)).toBe(true);
+		expect(posts.every((post) => post.draft === false)).toBe(true);
 	});
 
 	it("slug が記事ディレクトリ名で一意になる", () => {
@@ -24,7 +24,7 @@ describe("getPublishedPosts", () => {
 
 describe("getPublishedPostBySlug", () => {
 	it("存在する slug の記事を返す", () => {
-		expect(getPublishedPostBySlug("first-post")?.data.title).toBeTruthy();
+		expect(getPublishedPostBySlug("first-post")?.title).toBeTruthy();
 	});
 
 	it("存在しない slug には undefined を返す", () => {

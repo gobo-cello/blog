@@ -25,7 +25,7 @@ export function loader({ params }: Route.LoaderArgs) {
 		category,
 		categories,
 		posts: sortPostsByDateDesc(
-			posts.filter((post) => post.data.category === category),
+			posts.filter((post) => post.category === category),
 		),
 	};
 }

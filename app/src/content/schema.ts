@@ -24,7 +24,6 @@ export const postFrontmatterSchema = z.object({
 
 type PostFrontmatter = z.infer<typeof postFrontmatterSchema>;
 
-export interface Post {
+export interface Post extends PostFrontmatter {
 	slug: string;
-	data: PostFrontmatter;
 }

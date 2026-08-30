@@ -5,6 +5,6 @@ import { CATEGORIES, type Category, type Post } from "../content/schema";
  * 記事が1件も存在しないカテゴリはリンク先が存在しないため除外する。
  */
 export function categoriesWithPosts(posts: Post[]): Category[] {
-	const present = new Set(posts.map((post) => post.data.category));
+	const present = new Set(posts.map((post) => post.category));
 	return CATEGORIES.filter((category) => present.has(category));
 }

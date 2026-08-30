@@ -47,7 +47,7 @@ function getContentRoutePaths(): {
 	const posts = sortPostsByDateDesc(getPublishedPosts());
 	return {
 		categories: categoriesWithPosts(posts),
-		tags: [...new Set(posts.flatMap((post) => post.data.tags))],
+		tags: [...new Set(posts.flatMap((post) => post.tags))],
 		posts: posts.map((post) => post.slug),
 	};
 }

@@ -28,10 +28,10 @@ export function buildRss(siteUrl: string): string {
 		.map((post) => {
 			const link = `${siteUrl}/posts/${post.slug}/`;
 			return `\t<item>
-\t\t<title>${escapeXml(plainTitle(post.data.title))}</title>
+\t\t<title>${escapeXml(plainTitle(post.title))}</title>
 \t\t<link>${link}</link>
 \t\t<guid>${link}</guid>
-\t\t<pubDate>${post.data.date.toUTCString()}</pubDate>
+\t\t<pubDate>${post.date.toUTCString()}</pubDate>
 \t</item>`;
 		})
 		.join("\n");
