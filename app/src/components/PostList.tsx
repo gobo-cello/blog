@@ -19,19 +19,19 @@ export default function PostList({
 						href={`/posts/${post.slug}/`}
 						className="text-lg font-semibold text-foreground no-underline hover:text-accent"
 					>
-						<Title title={post.data.title} />
+						<Title title={post.title} />
 					</a>
 					<div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted">
-						<p>{post.data.date.toISOString().slice(0, 10)}</p>
+						<p>{post.date.toISOString().slice(0, 10)}</p>
 						{showCategory && (
 							<>
 								<span aria-hidden="true">·</span>
-								<CategoryBadge category={post.data.category} />
+								<CategoryBadge category={post.category} />
 							</>
 						)}
-						{post.data.tags.length > 0 && (
+						{post.tags.length > 0 && (
 							<ul className="m-0 flex list-none flex-wrap gap-2 p-0">
-								{post.data.tags.map((tag) => (
+								{post.tags.map((tag) => (
 									<li key={tag}>
 										<a
 											href={`/tags/${tag}/`}

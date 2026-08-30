@@ -5,7 +5,5 @@ import type { Post } from "../content/schema";
  * 表示順を揃えるために共通化している。
  */
 export function sortPostsByDateDesc(posts: Post[]): Post[] {
-	return [...posts].sort(
-		(a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
-	);
+	return [...posts].sort((a, b) => b.date.valueOf() - a.date.valueOf());
 }
