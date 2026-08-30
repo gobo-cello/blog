@@ -310,7 +310,7 @@ GitHub ActionsからAWSへは、OIDCによる一時認証だけを使用しま�
 
 5. 次のGitHub Variablesを登録します。
 
-   - Repository Variables: `AWS_BLOG_SANDBOX_ACCOUNT_ID`、`AWS_BLOG_PRODUCTION_ACCOUNT_ID`、`APEX_DOMAIN_NAME`(headerからlandingへリンクするapexドメイン名。`app/src/root.tsx`のリンク生成に使用)
+   - Repository Variables: `AWS_BLOG_SANDBOX_ACCOUNT_ID`、`AWS_BLOG_PRODUCTION_ACCOUNT_ID`、`VITE_APEX_DOMAIN_NAME`(headerからlandingへリンクするapexドメイン名。`app/src/root.tsx`のリンク生成に使用。`VITE_`プレフィックスによりViteが`import.meta.env`経由でクライアントバンドルへ露出する)
    - Environment `sandbox` Variables: `AWS_BLOG_SANDBOX_DEPLOY_ROLE_ARN`(手順3のSandbox側ARN)
    - Environment `production` Variables: `AWS_BLOG_PRODUCTION_DEPLOY_ROLE_ARN`(手順3のProduction側ARN)
 

@@ -25,13 +25,6 @@ const siteConfigSchema = z.object({
 	blogDomainName: z
 		.string({ error: "BLOG_DOMAIN_NAME environment variable is required" })
 		.min(1, "BLOG_DOMAIN_NAME environment variable is required"),
-	/**
-	 * ヘッダーの外部サイトへのナビゲーションリンク先にしか使われない。既定値のまま
-	 * 表示されてもページ自体は壊れないため、`blogDomainName` と違って未設定でも
-	 * build を止めず安全な既定ドメインへフォールバックする。この扱いの差
-	 * (canonical URL は hard fail / ナビリンクは既定値許容)が両者の違い。
-	 */
-	apexDomainName: z.string().optional().default("example.com"),
 });
 
 type SiteConfigValues = z.infer<typeof siteConfigSchema>;
@@ -39,7 +32,6 @@ type SiteConfigValues = z.infer<typeof siteConfigSchema>;
 export type SiteConfig = Readonly<
 	SiteConfigValues & {
 		siteUrl: string;
-		apexUrl: string;
 	}
 >;
 
@@ -50,7 +42,6 @@ export type SiteConfig = Readonly<
 export function resolveSiteConfig(env: NodeJS.ProcessEnv): SiteConfig {
 	const parsed = siteConfigSchema.safeParse({
 		blogDomainName: env.BLOG_DOMAIN_NAME,
-		apexDomainName: env.APEX_DOMAIN_NAME,
 	});
 	if (!parsed.success) {
 		throw new Error(
@@ -59,11 +50,9 @@ export function resolveSiteConfig(env: NodeJS.ProcessEnv): SiteConfig {
 		);
 	}
 
-	const { blogDomainName, apexDomainName } = parsed.data;
+	const { blogDomainName } = parsed.data;
 	return {
 		blogDomainName,
-		apexDomainName,
 		siteUrl: `https://${blogDomainName}`,
-		apexUrl: `https://${apexDomainName}`,
 	};
 }

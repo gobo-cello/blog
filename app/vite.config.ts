@@ -14,10 +14,12 @@ import { rehypeMermaidFence } from "./src/mdx/rehype-mermaid-fence.ts";
 /**
  * infra/ の `.env.local`(`cdk.json` の `--env-file-if-exists`)と同様に、
  * ローカル開発では `.env.local` を読み込む。ここで `process.env` へ橋渡しして
- * おくことで、Node のビルドプロセス内で `process.env` を読む `src/config/site.ts`
- * (prerender 時に RSS / sitemap の resource route loader から呼ばれる)が
- * `.env.local` の値を拾える。
- * Vite の `import.meta.env` はビルド対象コード側の仕組みで、ここには届かない。
+ * おくことで、Node のビルドプロセス内で `process.env` を読むサーバー側専用の
+ * `src/config/site.ts`(prerender 時に RSS / sitemap の resource route loader
+ * から呼ばれる)が `.env.local` の値を拾える。
+ * クライアントバンドルへ露出させたい値は `VITE_` プレフィックス付きの環境変数と
+ * し、ビルド対象コードから `import.meta.env` 経由で読む(Vite が自動で露出する)。
+ * この橋渡しループはあくまでサーバー側 `src/config/site.ts` のためのもの。
  * CI で明示的に渡された環境変数を上書きしないよう、未設定のキーだけ補う。
  */
 for (const [key, value] of Object.entries(
@@ -43,12 +45,4 @@ export default defineConfig({
 		tailwindcss(),
 		reactRouter(),
 	],
-	define: {
-		// クライアントバンドルは process.env を持たないため、ビルド時に静的な
-		// 文字列へ置き換える(src/root.tsx 参照)。環境変数名と既定値の
-		// source of truth は src/config/site.ts。
-		"process.env.APEX_DOMAIN_NAME": JSON.stringify(
-			process.env.APEX_DOMAIN_NAME ?? "",
-		),
-	},
 });

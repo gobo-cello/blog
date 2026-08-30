@@ -20,21 +20,4 @@ describe("resolveSiteConfig", () => {
 			"BLOG_DOMAIN_NAME environment variable is required",
 		);
 	});
-
-	it("APEX_DOMAIN_NAME が未設定なら example.com にフォールバックする", () => {
-		const config = resolveSiteConfig({ BLOG_DOMAIN_NAME: "blog.example.com" });
-
-		expect(config.apexDomainName).toBe("example.com");
-		expect(config.apexUrl).toBe("https://example.com");
-	});
-
-	it("APEX_DOMAIN_NAME が指定されていればその値を使う", () => {
-		const config = resolveSiteConfig({
-			BLOG_DOMAIN_NAME: "blog.example.com",
-			APEX_DOMAIN_NAME: "gobo-cello.example",
-		});
-
-		expect(config.apexDomainName).toBe("gobo-cello.example");
-		expect(config.apexUrl).toBe("https://gobo-cello.example");
-	});
 });

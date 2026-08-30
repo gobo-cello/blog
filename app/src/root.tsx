@@ -12,10 +12,12 @@ import "./styles/global.css";
 import NotFound from "./components/NotFound";
 import { plainTitle } from "./lib/title";
 
-// クライアントバンドルは process.env を持たないため、vite.config.ts の define が
-// ビルド時にこの参照を静的な文字列へ置き換える。環境変数名と既定値の source of
-// truth は src/config/site.ts(こちらは Node 実行前提のため client からは import しない)。
-const apexDomainName = process.env.APEX_DOMAIN_NAME || "example.com";
+// ヘッダーから外部サイト(landing)へのリンク先ドメイン。値はビルド時の環境変数
+// `VITE_APEX_DOMAIN_NAME` に由来し、Vite が `VITE_` プレフィックス付きの変数を
+// `import.meta.env` 経由でクライアントバンドルへ自動的に露出する。未設定でも
+// リンク先が変わるだけでページは壊れないため、安全な既定ドメインへフォールバック
+// する。canonical URL を扱うサーバー側専用の src/config/site.ts とは別系統。
+const apexDomainName = import.meta.env.VITE_APEX_DOMAIN_NAME || "example.com";
 
 interface RouteHandle {
 	wide?: boolean;
