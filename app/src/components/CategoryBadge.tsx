@@ -4,7 +4,7 @@ import { CATEGORY_COLOR_CLASS } from "../lib/categoryColor";
 export default function CategoryBadge({ category }: { category: Category }) {
 	return (
 		<a
-			href={`/categories/${category}/`}
+			href={`/categories/${category}`}
 			className="flex items-center gap-1.5 text-muted no-underline hover:text-accent"
 		>
 			<span

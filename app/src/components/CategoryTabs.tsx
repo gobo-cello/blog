@@ -35,7 +35,7 @@ export default function CategoryTabs({
 				return (
 					<a
 						key={category}
-						href={`/categories/${category}/`}
+						href={`/categories/${category}`}
 						aria-current={isActive ? "page" : undefined}
 						className={`${baseClass} ${
 							isActive ? `${color.border} ${color.text}` : inactiveClass

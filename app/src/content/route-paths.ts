@@ -4,18 +4,23 @@ import { getPublishedPosts } from "./posts";
 
 /**
  * prerender するパス一覧と sitemap のパス一覧は、対象となる記事・カテゴリ・タグの
- * 集合が同一で、末尾スラッシュの有無だけが異なる。両者を別々に組み立てると
- * 「カテゴリは記事のあるものだけ」「タグは公開記事の tag を重複排除」といった
- * 導出ルールが二重管理になり、片方だけ直して不整合を生む事故が起きやすい。
+ * 集合が同一で、含める特殊ルート(`/404` か `/`)だけが異なる。両者を別々に
+ * 組み立てると「カテゴリは記事のあるものだけ」「タグは公開記事の tag を重複排除」
+ * といった導出ルールが二重管理になり、片方だけ直して不整合を生む事故が起きやすい。
  * そのため導出は `getContentRoutePaths` に一本化し、出力形式の差分だけを
  * `getPrerenderPaths` / `getSitemapPaths` で表現する。
  *
- * 末尾スラッシュの扱いには次の制約がある。
- * - prerender: React Router の prerender は末尾スラッシュなしのパスを要求し、
- *   出力はトップページを除き `<path>/index.html` になる。
- * - アプリ内リンク / sitemap: 従来どおり末尾スラッシュ付きの正規 URL を用いる。
- * - `/404`: prerender 専用。エラーページを sitemap に載せてはならないため、
- *   `getSitemapPaths` には含めない。
+ * canonical URL は末尾スラッシュなしに統一する(トップページの `/` のみ例外)。
+ * これは React Router の制約に合わせた選択である。
+ * - prerender は末尾スラッシュなしのパスしか受け付けず、出力はトップページを除き
+ *   `<path>/index.html` になる。
+ * - クライアントサイド遷移で読む `<path>.data` も同じ末尾スラッシュなし形で出力される
+ *   (`singleFetchUrl` は末尾スラッシュ付きだと `<path>/_.data` を要求してしまう)。
+ * アプリ内リンク・sitemap・RSS も同じ形に揃えることで、prerender 出力・`.data`・
+ * リンク先が常に一致する。
+ *
+ * `/404` は prerender 専用。エラーページを sitemap に載せてはならないため
+ * `getSitemapPaths` には含めない。
  *
  * prerender 対象のうち静的ルート(`/` `/rss.xml` `/sitemap.xml`)は `routes.ts` の
  * 定義そのものなので `react-router.config.ts` 側で `getStaticPaths()` から導出する。
@@ -73,14 +78,14 @@ export function getPrerenderPaths(): string[] {
 
 /**
  * `feed.ts` の `buildSitemap()` が `<loc>` に並べるパス一覧。
- * 末尾スラッシュ付き。`/404` は含めない。
+ * トップページの `/` を除き末尾スラッシュなし。`/404` は含めない。
  */
 export function getSitemapPaths(): string[] {
 	const { categories, tags, posts } = getContentRoutePaths();
 	return [
 		"/",
-		...categories.map((category) => `/categories/${category}/`),
-		...tags.map((tag) => `/tags/${tag}/`),
-		...posts.map((slug) => `/posts/${slug}/`),
+		...categories.map((category) => `/categories/${category}`),
+		...tags.map((tag) => `/tags/${tag}`),
+		...posts.map((slug) => `/posts/${slug}`),
 	];
 }

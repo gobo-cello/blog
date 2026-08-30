@@ -33,7 +33,7 @@ export default function TagPage({ loaderData }: Route.ComponentProps) {
 				{posts.map((post) => (
 					<li key={post.slug} className="py-3 first:pt-0">
 						<a
-							href={`/posts/${post.slug}/`}
+							href={`/posts/${post.slug}`}
 							className="text-foreground no-underline hover:text-accent"
 						>
 							<Title title={post.title} />
