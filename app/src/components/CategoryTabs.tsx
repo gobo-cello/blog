@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import type { Category } from "../content/schema";
 import { CATEGORY_COLOR_CLASS } from "../lib/categoryColor";
 
@@ -20,22 +21,24 @@ export default function CategoryTabs({
 			aria-label="カテゴリ"
 			className="mt-6 flex flex-wrap gap-4 border-b border-border"
 		>
-			<a
-				href="/"
+			<Link
+				to="/"
+				prefetch="intent"
 				aria-current={active === null ? "page" : undefined}
 				className={`${baseClass} ${
 					active === null ? "border-accent text-accent" : inactiveClass
 				}`}
 			>
 				All
-			</a>
+			</Link>
 			{categories.map((category) => {
 				const isActive = active === category;
 				const color = CATEGORY_COLOR_CLASS[category];
 				return (
-					<a
+					<Link
 						key={category}
-						href={`/categories/${category}`}
+						to={`/categories/${category}`}
+						prefetch="intent"
 						aria-current={isActive ? "page" : undefined}
 						className={`${baseClass} ${
 							isActive ? `${color.border} ${color.text}` : inactiveClass
@@ -46,7 +49,7 @@ export default function CategoryTabs({
 							className={`inline-block h-2 w-2 rounded-full ${color.dot}`}
 						/>
 						{category}
-					</a>
+					</Link>
 				);
 			})}
 		</nav>
