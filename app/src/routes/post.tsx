@@ -17,27 +17,38 @@ interface PostModule {
 
 /**
  * 記事本文(MDX を React コンポーネントへコンパイルしたもの)は route モジュール
- * である本ファイルの module scope で解決する。全記事を post ルートの chunk に
- * 同梱(eager)する。記事数が増えて肥大化したら、各 .mdx を個別 route にする
- * (React Router の route 単位コード分割へ載せ替える)ことを検討する。
+ * である本ファイルの module scope で解決する。全記事を eager で post ルートの
+ * chunk に同梱する(記事数が少なく、遅延ロードの分割境界を増やすより 1 chunk に
+ * まとめたほうが取り回しが良いため)。
+ *
+ * 次のいずれかが観測できるようになったら分割の合図とみなし、非 eager glob +
+ * `React.lazy` か各 `.mdx` の個別 route 化で、ルート単位のコード分割へ移す。
+ *   - post ルートの chunk が gzip で体感できる規模(数十 kB〜)になった
+ *   - 記事数が数十件規模になった
  */
 const postModules = import.meta.glob<PostModule>(
 	"../content/posts/*/index.mdx",
 	{ eager: true },
 );
 
-function moduleForSlug(slug: string): PostModule | undefined {
-	for (const [path, module] of Object.entries(postModules)) {
-		if (path.split("/").at(-2) === slug) {
-			return module;
-		}
-	}
-	return undefined;
-}
+/**
+ * slug から記事モジュールを O(1) で引くための索引を module scope で一度だけ構築する。
+ * 以前は loader とコンポーネントで glob エントリを毎回線形走査していた(1 描画で 2 回)。
+ *
+ * key は glob パス `../content/posts/<slug>/index.mdx` の末尾から 2 番目のセグメント。
+ * glob パターンが必ずディレクトリ名を 1 階層挟むため `at(-2)` が undefined になること
+ * はないが、`noUncheckedIndexedAccess` 下では型に現れるので取り出せた場合だけ採用する。
+ */
+const postModuleBySlug: Record<string, PostModule> = Object.fromEntries(
+	Object.entries(postModules).flatMap(([path, module]) => {
+		const slug = path.split("/").at(-2);
+		return slug ? [[slug, module] as const] : [];
+	}),
+);
 
 export function loader({ params }: Route.LoaderArgs) {
 	const post = getPublishedPostBySlug(params.slug);
-	if (!post || !moduleForSlug(params.slug)) {
+	if (!post || !postModuleBySlug[params.slug]) {
 		throw data(null, { status: 404 });
 	}
 	return { post };
@@ -55,7 +66,7 @@ export const meta: Route.MetaFunction = ({ loaderData }) => [
 
 export default function PostPage({ loaderData }: Route.ComponentProps) {
 	const { post } = loaderData;
-	const module = moduleForSlug(post.slug);
+	const module = postModuleBySlug[post.slug];
 	if (!module) {
 		return null;
 	}
