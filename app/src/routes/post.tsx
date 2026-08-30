@@ -87,7 +87,7 @@ export default function PostPage({ loaderData }: Route.ComponentProps) {
 							{post.tags.map((tag) => (
 								<li key={tag}>
 									<a
-										href={`/tags/${tag}/`}
+										href={`/tags/${tag}`}
 										className="rounded-full border border-border px-3 py-1 text-sm text-muted no-underline hover:border-accent hover:text-accent"
 									>
 										#{tag}

@@ -26,7 +26,7 @@ function escapeXml(text: string): string {
 export function buildRss(siteUrl: string): string {
 	const items = sortPostsByDateDesc(getPublishedPosts())
 		.map((post) => {
-			const link = `${siteUrl}/posts/${post.slug}/`;
+			const link = `${siteUrl}/posts/${post.slug}`;
 			return `\t<item>
 \t\t<title>${escapeXml(plainTitle(post.title))}</title>
 \t\t<link>${link}</link>

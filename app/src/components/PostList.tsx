@@ -16,7 +16,7 @@ export default function PostList({
 			{posts.map((post) => (
 				<li key={post.slug} className="py-4 first:pt-0">
 					<a
-						href={`/posts/${post.slug}/`}
+						href={`/posts/${post.slug}`}
 						className="text-lg font-semibold text-foreground no-underline hover:text-accent"
 					>
 						<Title title={post.title} />
@@ -34,7 +34,7 @@ export default function PostList({
 								{post.tags.map((tag) => (
 									<li key={tag}>
 										<a
-											href={`/tags/${tag}/`}
+											href={`/tags/${tag}`}
 											className="rounded-full border border-border px-3 py-1 text-sm text-muted no-underline hover:border-accent hover:text-accent"
 										>
 											#{tag}
