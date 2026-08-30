@@ -16,6 +16,12 @@ import { getPublishedPosts } from "./posts";
  * - アプリ内リンク / sitemap: 従来どおり末尾スラッシュ付きの正規 URL を用いる。
  * - `/404`: prerender 専用。エラーページを sitemap に載せてはならないため、
  *   `getSitemapPaths` には含めない。
+ *
+ * prerender 対象のうち静的ルート(`/` `/rss.xml` `/sitemap.xml`)は `routes.ts` の
+ * 定義そのものなので `react-router.config.ts` 側で `getStaticPaths()` から導出する。
+ * このモジュールが担うのは、`routes.ts` からは列挙できない部分
+ * (記事・カテゴリ・タグの集合から導く動的コンテンツと、`*` splat マッチにしか
+ * 現れない `/404`)に限る。
  */
 
 /**
@@ -47,20 +53,18 @@ function getContentRoutePaths(): {
 }
 
 /**
- * `react-router.config.ts` の `prerender()` が返すパス一覧。
- * 末尾スラッシュなし。`/404` を含む。
+ * `react-router.config.ts` の `prerender()` に、動的コンテンツと `/404` のパスを
+ * 供給する。末尾スラッシュなし。
+ *
+ * 静的ルート(`/` `/rss.xml` `/sitemap.xml`)はここには含めない。これらは
+ * `routes.ts` の定義そのものなので、`prerender()` 側が `getStaticPaths()` から
+ * 導出する。`/404` は `*` splat マッチにしか現れず `getStaticPaths()` に載らない
+ * ため、動的コンテンツと合わせてこの関数で補う。
  */
 export function getPrerenderPaths(): string[] {
 	const { categories, tags, posts } = getContentRoutePaths();
 	return [
-		"/",
 		"/404",
-		// RSS / sitemap は resource route(`routes/rss.xml.ts` / `routes/sitemap.xml.ts`)
-		// として prerender する。ファイルそのものなので末尾スラッシュは付けない
-		// (付けると `<path>/index.html` 相当の扱いになる)。sitemap は自身とフィードを
-		// 列挙しないため、`getSitemapPaths` には加えない。
-		"/rss.xml",
-		"/sitemap.xml",
 		...categories.map((category) => `/categories/${category}`),
 		...tags.map((tag) => `/tags/${tag}`),
 		...posts.map((slug) => `/posts/${slug}`),
