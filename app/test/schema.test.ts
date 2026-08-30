@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { postFrontmatterSchema } from "../src/content/schema";
+import {
+	CATEGORIES,
+	isCategory,
+	postFrontmatterSchema,
+} from "../src/content/schema";
 
 describe("postFrontmatterSchema", () => {
 	it("必須項目だけの frontmatter に既定値を補う", () => {
@@ -79,5 +83,22 @@ describe("postFrontmatterSchema", () => {
 				category: "unknown",
 			}),
 		).toThrow();
+	});
+});
+
+describe("isCategory", () => {
+	it.each([...CATEGORIES])(
+		"既知のカテゴリ名 %s を Category と判定する",
+		(value) => {
+			expect(isCategory(value)).toBe(true);
+		},
+	);
+
+	it("未知のカテゴリ名を Category と判定しない", () => {
+		expect(isCategory("unknown")).toBe(false);
+	});
+
+	it("空文字を Category と判定しない", () => {
+		expect(isCategory("")).toBe(false);
 	});
 });

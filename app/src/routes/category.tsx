@@ -2,18 +2,25 @@ import { data } from "react-router";
 import CategoryTabs from "../components/CategoryTabs";
 import PostList from "../components/PostList";
 import { getPublishedPosts } from "../content/posts";
-import type { Category } from "../content/schema";
+import { isCategory } from "../content/schema";
 import { categoriesWithPosts } from "../lib/categories";
 import { sortPostsByDateDesc } from "../lib/sort";
 import type { Route } from "./+types/category";
 
 export function loader({ params }: Route.LoaderArgs) {
+	const { category } = params;
+	// 未知のカテゴリ名は 404。ここで型ガードを通すことで以降 `category` は `Category` に narrowing される。
+	if (!isCategory(category)) {
+		throw data(null, { status: 404 });
+	}
+
 	const posts = getPublishedPosts();
 	const categories = categoriesWithPosts(posts);
-	const category = params.category as Category;
+	// 既知のカテゴリ名でも公開記事が 1 件も無ければリンク先が存在しないため 404。
 	if (!categories.includes(category)) {
 		throw data(null, { status: 404 });
 	}
+
 	return {
 		category,
 		categories,
