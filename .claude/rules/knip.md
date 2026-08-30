@@ -27,7 +27,7 @@ Knip の設定と Knip 指摘への対応は、issue 数を減らして CI を�
 
 `entry` と `project` は `ignore` より先に設計する。まず Knip のデフォルトと有効な plugin が追加する `entry` を `--debug` で確認し、追加設定は不足がある場合だけにする。
 
-- `entry`: import graph の外側から実行される入口（アプリ起動ファイル、CLI、設定ファイル、生成スクリプト、HTML、動的 import、`buildEnd` などの hook から到達するファイル）。未使用 `export` の警告を消す目的で通常の module を `entry` に足さない。plugin や package script が同じ入口を追加していないか確認する（二重指定は redundant entry の configuration hint になる）。
+- `entry`: import graph の外側から実行される入口（アプリ起動ファイル、CLI、設定ファイル、生成スクリプト、HTML、動的 import、設定ファイルの関数（`prerender()` など）から到達するファイル）。未使用 `export` の警告を消す目的で通常の module を `entry` に足さない。plugin や package script が同じ入口を追加していないか確認する（二重指定は redundant entry の configuration hint になる）。
 - `project`: その workspace に属する解析対象ソースの範囲。build output・generated artifact・fixture は先頭 `!` の negated pattern で除外する。plugin が追加する test entry の除外や issue 抑制に `project` の negation を使わない。glob が意図したファイルに一致すること、redundant / no-match pattern を残さないことを確認する。
 - production mode でだけ範囲を変えるときは末尾 `!`（例: `bin/**/*.ts!` は通常・production 両方の対象、`!src/test-support/**!` は production mode でのみ除外）。先頭 `!`（negation）と末尾 `!`（production 限定）を混同しない。
 - `entry` ファイルの未使用 `export` はデフォルトで報告されない。private package で `entry` 内の `export` も検査したい場合だけ `includeEntryExports` を検討する。
