@@ -24,4 +24,5 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
-drafts
+# WIP 記事(公開しない下書き置き場)
+/src/content/posts/drafts/
